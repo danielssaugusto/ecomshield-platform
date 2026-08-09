@@ -13,6 +13,7 @@ dependencies = [
     "passlib[bcrypt]",
     "python-multipart",
     "pandas",
+    "pyarrow",
     "numpy",
     "matplotlib",
     "seaborn",
