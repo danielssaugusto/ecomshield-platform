@@ -116,8 +116,8 @@ FastAPI automatically generates interactive API documentation.
 
     http://127.0.0.1:8000/redoc
 
-> [!NOTE]
+> [!NOTE]  
 > The `--reload` option is intended for development environments. It should not be used in production.
 
 **Note:** The dataset used in this project is publicly available and is not included in this repository due to size and licensing considerations.  
-[link para o dataset](editar com o link para o dataset original)
+[Talkex - Dataset](editar com o link para o dataset original) 
