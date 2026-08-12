@@ -119,5 +119,19 @@ FastAPI automatically generates interactive API documentation.
 > [!NOTE]  
 > The `--reload` option is intended for development environments. It should not be used in production.
 
-**Note:** The dataset used in this project is publicly available and is not included in this repository due to size and licensing considerations.  
+## Dataset Selection
+
+The `talkex-augmented-pt-br` dataset was chosen because it represents natural customer interactions in Brazilian Portuguese. Its conversational content reflects how users communicate in real support scenarios, making it relevant to our objective of identifying user intentions from their messages.
+
+**Note:** The dataset used in this project is publicly available.  
 [Talkex - Dataset](https://huggingface.co/datasets/paulohenriquevn/talkex-augmented-pt-br) 
+
+## License dataset
+
+This dataset is licensed under the **Apache License 2.0**.
+
+The license permits the **use, reproduction, modification, and distribution** of the software, including for commercial purposes. Derivative works are also permitted, provided that the license terms are respected, copyright notices are preserved, and significant modifications are clearly identified.
+
+The Apache License 2.0 also includes a **patent grant**, providing protection to users and contributors against certain patent claims related to the software.
+
+For more details, see the [`LICENSE`](https://choosealicense.com/licenses/apache-2.0/) file included in this repository.
