@@ -120,4 +120,4 @@ FastAPI automatically generates interactive API documentation.
 > The `--reload` option is intended for development environments. It should not be used in production.
 
 **Note:** The dataset used in this project is publicly available and is not included in this repository due to size and licensing considerations.  
-[Talkex - Dataset](editar com o link para o dataset original) 
+[Talkex - Dataset](https://huggingface.co/datasets/paulohenriquevn/talkex-augmented-pt-br) 
