@@ -203,6 +203,14 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Downloaded and generated datasets are reproducible locally, but are not
+# committed because of their size and the upstream dataset licence.
+data/raw/b2w-reviews01/
+data/processed/b2w_reviews_intents.parquet
+data/processed/b2w_reviews_intents_report.json
+data/processed/b2w_manual_review_sample.csv
+reports/b2w_intents/
+
 # Ruff stuff:
 .ruff_cache/
 
