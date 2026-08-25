@@ -21,7 +21,11 @@ app = FastAPI(
 def health_check():
     return {"status": "ok", "message": "API operacional"}
 
+<<<<<<< HEAD
 @app.post("/auth/token", response_model=Token, tags=["Autenticação"])
+=======
+@app.post("/auth/login", response_model=Token, tags=["Autenticação"])
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user_dict = fake_users_db.get(form_data.username)
     if not user_dict or not verify_password(form_data.password, user_dict["hashed_password"]):
@@ -40,9 +44,13 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.get("/protected", response_model=User, tags=["Rota Protegida"])
 def read_protected_route(current_user: User = Depends(get_current_user)):
+<<<<<<< HEAD
     return current_user
 
 @app.post("/predict", tags=["Predição"])
 def predict(current_user: User = Depends(get_current_user)):
     # Retorna um placeholder conforme exigido pela rubrica
     return {"message": "Previsão realizada com sucesso (placeholder)", "user": current_user.username}
+=======
+    return current_user
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88

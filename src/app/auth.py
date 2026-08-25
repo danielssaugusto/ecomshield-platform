@@ -9,7 +9,11 @@ from src.app.config import settings
 from src.app.models import TokenData, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+<<<<<<< HEAD
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+=======
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 
 # Banco de dados simulado para teste
 fake_users_db = {

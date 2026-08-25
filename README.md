@@ -41,6 +41,7 @@ Activate the virtual environment:
 ```
 
 ### Installing Dependencies
+<<<<<<< HEAD
 To install the project dependencies, use the `requirements.txt` file provided in the repository.
 
 Run the following command:
@@ -48,13 +49,36 @@ Run the following command:
 pip install -r requirements.txt
 ```
 This will install FastAPI, Uvicorn, Pydantic, and all other necessary libraries.
+=======
+Before installing the project dependencies, make sure the project contains either a `pyproject.toml` or a `setup.py` file in its root directory.
+
+These files contain the project's **Python packaging configuration**. They define information such as the project name, version, dependencies, build system, and other metadata required by Python package managers such as `pip`.
+
+> [!NOTE]
+> A `pyproject.toml` file is the modern and recommended approach for configuring Python projects. `setup.py` is the older approach and is still supported by many projects.
+
+If neither file exists, running the following command will result in an error:
+```bash
+pip install -e ".[dev]"
+```
+This installs the project in editable mode along with the development dependencies defined for the project.
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 
 To verify the installed packages and their versions, run:
 ```bash
 pip list
 ```
 
+<<<<<<< HEAD
 Once the dependencies are installed, make sure the virtual environment is activated before running project commands.
+=======
+You can learn more about Python project configuration in the official Python documentation:
+- [Python Packaging User Guide](https://packaging.python.org/)
+- [Writing your pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)
+- [Setuptools Documentation](https://setuptools.pypa.io/)
+
+Once `pyproject.toml` or `setup.py` is present, activate the virtual environment and install the project's dependencies.
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 
 > [!IMPORTANT]
 > Make sure the virtual environment is activated before installing dependencies or running project commands.
@@ -66,11 +90,16 @@ After installing the dependencies, make sure you are in the project's root direc
 The project uses **Uvicorn** as the ASGI server to run the FastAPI application.
 
 Start the development server with:
+<<<<<<< HEAD
     python -m uvicorn src.main:app --reload
+=======
+    uvicorn ecomshield.main:app --reload
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 
 > [!IMPORTANT]
 > Run the Uvicorn command from the project's root directory, not from inside `src/ecomshield/`.
 
+<<<<<<< HEAD
 The `src.main:app` syntax follows this structure:
 
     src.main:app
@@ -78,6 +107,15 @@ The `src.main:app` syntax follows this structure:
     │   │    └── FastAPI application instance
     │   └────── Python module (main.py)
     └─────────────── Python package/folder (src)
+=======
+The `ecomshield.main:app` syntax follows this structure:
+
+    ecomshield.main:app
+    │        │    │
+    │        │    └── FastAPI application instance
+    │        └────── Python module (main.py)
+    └─────────────── Python package (ecomshield)
+>>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 
 The `--reload` option automatically restarts the development server whenever changes are detected in the source code.
 
