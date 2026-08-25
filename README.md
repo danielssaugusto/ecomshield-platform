@@ -9,6 +9,9 @@ Secure e-commerce platform for refund management, risk analysis, role-based acce
 * Python 3.14.4
 * FastAPI
 
+> [!IMPORTANT]
+> Make sure the virtual environment is activated before installing dependencies or running project commands.
+
 ## Setting Up the Virtual Environment
 
 To create an isolated Python environment for the project, follow the instructions for your operating system.
@@ -61,7 +64,11 @@ To verify the installed packages and their versions, run:
 pip freeze
 ```
 
-> **Important:** Make sure the virtual environment is activated before installing dependencies or running project commands.
+> [!IMPORTANT]
+> Make sure the virtual environment is activated before installing dependencies or running project commands.
+
+> [!TIP]
+> If you receive `ModuleNotFoundError` after installing the dependencies, verify that your terminal and Jupyter Notebook are using the same Python virtual environment.
 
 ## Running the Application
 
@@ -77,7 +84,8 @@ Start the development server with:
 python -m uvicorn src.main:app --reload
 ```
 
-> **Important:** Run the Uvicorn command from the project's root directory.
+> [!IMPORTANT]
+> Run the Uvicorn command from the project's root directory.
 
 The `src.main:app` syntax follows this structure:
 
@@ -114,6 +122,9 @@ Expected response:
 }
 ```
 
+> [!NOTE]
+> A successful health check confirms that the FastAPI application is running and responding to requests.
+
 ### API Documentation
 
 FastAPI automatically generates interactive API documentation.
@@ -130,13 +141,20 @@ http://127.0.0.1:8000/docs
 http://127.0.0.1:8000/redoc
 ```
 
-> **Note:** The `--reload` option is intended for development environments. It should not be used in production.
+> [!TIP]
+> Swagger UI is useful during development because it allows you to inspect and test the API endpoints directly from the browser.
+
+> [!WARNING]
+> The `--reload` option is intended for development environments. It should not be used in production.
 
 ## Dataset Selection
 
-**Note:** The dataset used in this project is publicly available.
+The dataset used in this project is publicly available.
 
 [**B2W-Reviews01 on Hugging Face**](https://huggingface.co/datasets/fgops05/b2w-reviews01): 132,373 public reviews in Portuguese, collected on Americanas.com between January and May 2018. The corpus was created for review analysis, not for support intent classification.
+
+> [!IMPORTANT]
+> The dataset does **not** contain an original customer-support `intent` column. The project's intent labels are derived from transparent text-based rules.
 
 ## Dataset Results
 
@@ -172,9 +190,13 @@ http://127.0.0.1:8000/redoc
 | `listing_information`    |     215 |
 | `damaged_packaging`      |      45 |
 
-There are 22,695 reviews with more than one detected **theme**. Sentiment is not included in `intent_matches` to avoid artificial co-occurrences such as "positive + negative"; these cases are recorded as `sentiment=mixed`.
+> [!NOTE]
+> There are 22,695 reviews with more than one detected **theme**. Sentiment is not included in `intent_matches` to avoid artificial co-occurrences such as "positive + negative"; these cases are recorded as `sentiment=mixed`.
 
-### EDA Evidence for Delivery
+## EDA Evidence for Delivery
+
+> [!IMPORTANT]
+> The EDA notebook is the primary evidence supporting the analysis and characterization of the selected dataset.
 
 The notebook [`03_b2w_intent_eda.ipynb`](https://github.com/danielssaugusto/ecomshield-platform/blob/dataset/b2w-intent-labeling/notebooks/03_b2w_intent_eda.ipynb) is the primary evidence for the analysis of the chosen dataset. It executes, using the Parquet file located in `data/processed/`:
 
@@ -192,6 +214,9 @@ python3 scripts/create_b2w_review_sample.py \
   --per-sentiment 25
 ```
 
+> [!TIP]
+> The manual review sample can be used to inspect whether the automatically generated intent labels are consistent with the actual text.
+
 ### Choice Justification
 
 B2W-Reviews01 was chosen for the e-commerce customer service domain because:
@@ -202,27 +227,40 @@ B2W-Reviews01 was chosen for the e-commerce customer service domain because:
 * it features a public license and academic reference, which allows documenting provenance and reproducibility;
 * it brings real complaints regarding logistics, products, payment, and customer service, compatible with the E-ComShield scope.
 
-Since there is no original intent column, the project creates `intent` and `intent_matches` via transparent rules. This choice is made explicit so as not to confuse derived categories with human annotations.
+> [!IMPORTANT]
+> Since there is no original intent column, the project creates `intent` and `intent_matches` via transparent rules. These are **derived labels**, not human-annotated ground truth.
 
 ## Limitations and Responsible Use
 
+> [!WARNING]
+> The dataset and generated labels must not be treated as a perfect representation of customer behavior or as certified ground truth.
+
 * The dataset represents reviews from 2018; it does not automatically describe current customers.
 * Keywords do not account for irony, complex context, or all spelling errors.
-* `intent` is a text-based thematic hypothesis; when no theme is found, it defaults to `general_review`. `sentiment` may use the rating as a fallback and is also not a certified human annotation.
+* `intent` is a text-based thematic hypothesis; when no theme is found, it defaults to `general_review`.
+* `sentiment` may use the rating as a fallback and is also not a certified human annotation.
 * Masking covers common patterns, not every instance of free personal data. Treat the text as potentially sensitive.
 * Do not use these classes as the sole criterion for financial decisions, automatic cancellations, or actions against customers/vendors.
 
+> [!IMPORTANT]
+> The generated intent categories are intended for analysis, experimentation, and model development. They should not be used alone to make high-impact decisions involving customers or vendors.
+
 ## How to Reproduce the Dataset
 
-To run the EDA, use Python 3.10+ with a dedicated virtual environment. The installation below is intentionally independent of the API: it installs only the libraries required for the dataset and avoids conflicts with the application's runtime setup.
+> [!IMPORTANT]
+> The dataset preparation and EDA environment is intentionally independent of the API environment.
+
+To run the EDA, use Python 3.10+ with a dedicated virtual environment. The installation below installs only the libraries required for the dataset and avoids conflicts with the application's runtime setup.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+
 python -m pip install --upgrade pip
 python -m pip install pandas pyarrow matplotlib seaborn jupyter ipykernel
 
 mkdir -p data/raw/b2w-reviews01
+
 curl -L -o data/raw/b2w-reviews01/B2W-Reviews01.csv \
   https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv
 
@@ -232,12 +270,16 @@ python3 scripts/build_b2w_intent_dataset.py \
   --report data/processed/b2w_reviews_intents_report.json
 ```
 
+> [!NOTE]
+> The commands above reproduce the processed Parquet dataset from the original B2W-Reviews01 CSV and generate the corresponding report.
+
 ## Dataset License
 
 This dataset is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 
 The license permits the **sharing, copying, redistribution, and adaptation** of the material in any medium or format, including for commercial purposes. You are free to remix, transform, and build upon the material, provided that the license terms are respected.
 
-The core requirement of the CC BY 4.0 license is **attribution**: you must give appropriate credit to the source, provide a link to the license, and clearly indicate if changes were made when using or redistributing the material.
+> [!IMPORTANT]
+> The main requirement of the CC BY 4.0 license is **attribution**. When using or redistributing the dataset, appropriate credit must be given to the source, a link to the license must be provided, and any changes must be clearly indicated.
 
 For more details, see the [`LICENSE`](https://creativecommons.org/licenses/by/4.0/) file included in this repository.
