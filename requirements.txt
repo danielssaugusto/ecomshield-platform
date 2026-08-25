@@ -1,15 +1,8 @@
 fastapi
 uvicorn[standard]
-<<<<<<< HEAD
 pydantic[email]
-=======
-pydantic
->>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
 pydantic-settings
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
-<<<<<<< HEAD
 bcrypt==4.0.1
-=======
->>>>>>> 9bef8afb276b647157e0c888996253ea7fb68f88
