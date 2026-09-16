@@ -1,0 +1,33 @@
+# ── Core API ──────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+pydantic[email]
+pydantic-settings
+python-multipart
+
+# ── Authentication ────────────────────────────────────────
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1
+
+# ── Database (PostgreSQL + ORM) ───────────────────────────
+sqlmodel
+psycopg2-binary
+
+# ── Data Science / EDA ────────────────────────────────────
+pandas
+pyarrow
+numpy
+matplotlib
+seaborn
+
+# ── Notebooks ─────────────────────────────────────────────
+jupyter
+ipykernel
+
+# ── Testing ───────────────────────────────────────────────
+pytest
+httpx
+
+# ── Linting ───────────────────────────────────────────────
+ruff
