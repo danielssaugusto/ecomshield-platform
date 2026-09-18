@@ -1,7 +1,91 @@
-# ecomshield-platform
-Secure e-commerce platform for refund management, risk analysis, role-based access control, and LLM tool calling, built with Python and FastAPI.
+# E-ComShield
 
-## Tools
+Projeto acadêmico de análise de feedback e classificação de intenções para
+e-commerce. A estratégia de dados separa explicitamente duas finalidades:
+
+| Finalidade | Dataset | Como é usado |
+| --- | --- | --- |
+| Feedback real e análise exploratória | B2W-Reviews01 | Avaliações reais em PT-BR; EDA, sentimento e análise de risco. Não é usado como variável-alvo de intenção. |
+| Classificação de intenção | Bitext Retail eCommerce | Corpus rotulado com os campos originais `instruction`, `category` e `intent`. |
+
+Essa divisão evita a criação de intenções por heurísticas de palavras-chave. O
+modelo de intenção deve usar apenas o campo `intent` publicado pelo Bitext.
+
+## Dataset de intenção
+
+O pipeline preserva os 46 rótulos de intenção e as 13 categorias da fonte,
+incluindo entrega, pedido, pagamento, troca e devolução. A fonte é o
+[Bitext Retail eCommerce](https://huggingface.co/datasets/bitext/Bitext-retail-ecommerce-llm-chatbot-training-dataset),
+sob licença CDLA-Sharing-1.0. O corpus se declara híbrido/sintético; essa
+limitação é registrada nos relatórios e não é ocultada.
+
+Para baixar, validar, dividir de modo determinístico e gerar o relatório:
+
+```bash
+python scripts/build_bitext_intent_dataset.py
+```
+
+O comando gera, localmente e sem versionar dados brutos:
+
+- `data/raw/bitext-retail-ecommerce/bitext-retail-ecommerce.csv`
+- `data/processed/bitext_retail_intents.parquet`
+- `data/processed/bitext_retail_intents_report.json`
+- `reports/bitext_retail_intents/relatorio.md`
+
+As categorias e intenções não são renomeadas, inferidas ou combinadas pelo
+pipeline. A divisão `train`/`validation`/`test` é estratificada por intenção e
+determinística (80/10/10).
+
+Para treinar e avaliar um baseline transparente, exclusivamente no Bitext:
+
+```bash
+python scripts/train_bitext_intent_baseline.py
+```
+
+O modelo e as métricas são gerados localmente. A avaliação usa somente o teste
+isolado e não deve ser apresentada como desempenho em dados brasileiros reais.
+O notebook de avaliação é `notebooks/05_bitext_intent_baseline.ipynb`.
+O relatório de erros fica em `reports/bitext_intent_model/erros.md`.
+
+## B2W-Reviews01
+
+O B2W-Reviews01 permanece como fonte complementar de avaliações reais em
+português. Artefatos antigos que contêm rótulos por heurística não devem ser
+usados para treinamento ou avaliação do classificador de intenção; são apenas
+histórico da exploração inicial.
+
+Para regenerar a EDA do B2W sem criar intenções artificiais:
+
+```bash
+python scripts/generate_b2w_feedback_eda.py
+```
+
+O notebook correspondente é `notebooks/03_b2w_feedback_eda.ipynb`.
+
+## Validação externa em português
+
+Para responder à limitação de idioma e à origem híbrida/sintética do Bitext,
+o projeto inclui uma fila reprodutível de revisão humana de feedbacks reais do
+B2W. Ela não recebe rótulos automáticos. O protocolo, os critérios de dupla
+anotação e a métrica de concordância estão em
+[`docs/ptbr_intent_validation_protocol.md`](docs/ptbr_intent_validation_protocol.md).
+
+```bash
+python scripts/create_ptbr_validation_queue.py
+```
+
+São necessárias duas anotações humanas independentes e a adjudicação das
+divergências antes de chamar o conjunto de dados de validado.
+
+O panorama completo e as limitações da entrega de dados estão em
+[`reports/data_methodology/relatorio.md`](reports/data_methodology/relatorio.md).
+
+Após a dupla anotação e a adjudicação, o conjunto PT-BR fica reservado para
+avaliação externa. Ele não deve ser usado no treinamento do baseline Bitext.
+O notebook descritivo correspondente é
+`notebooks/06_ptbr_validated_dataset_eda.ipynb`.
+
+## Ferramentas
  - Jupyter Notebook
  -  Docker
  -  Python 3.14.4

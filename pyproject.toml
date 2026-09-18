@@ -13,10 +13,13 @@ dependencies = [
     "passlib[bcrypt]",
     "python-multipart",
     "pandas",
+    "certifi",
     "numpy",
     "matplotlib",
     "seaborn",
-    "jupyter"
+    "jupyter",
+    "pyarrow",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]
