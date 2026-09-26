@@ -1,185 +1,93 @@
-# 🛡️ E-ComShield Platform
+# EcomShield Platform
 
-Plataforma completa e segura para e-commerce focada em gestão de reembolsos, análise de risco, controle de acesso baseado em funções (RBAC), banco de dados relacional PostgreSQL e análise de dados (EDA) com suporte a LLM tool calling.
+Plataforma de seguranca e monitoramento para ecossistemas de comercio eletronico. O EcomShield Platform foi desenvolvido para auxiliar lojas virtuais a detectar fraudes, monitorar transacoes em tempo real e proteger operacoes contra ameacas digitais.
 
----
+## Indice
 
-## 🚀 Quickstart Guide (Guia Rápido)
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Arquitetura](#arquitetura)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Pre-requisitos](#pre-requisitos)
+- [Quick Start](#quick-start)
+- [Configuracao](#configuracao)
+- [Contribuicao](#contribuicao)
+- [Licenca](#licenca)
 
-Siga os passos abaixo para iniciar a aplicação rapidamente.
+## Sobre o Projeto
 
-### Opção 1: Com Docker Compose (Recomendado)
+O EcomShield Platform atua como uma camada de protecao intermediaria para arquiteturas de e-commerce. A solucao processa dados de transacoes, identifica padroes suspeitos de comportamento do usuario e fornece relatorios gerenciais para analistas de risco e seguranca.
 
-Execute a API FastAPI e o Banco PostgreSQL 16 integrados em containers com um único comando:
+## Arquitetura
 
-1. **Clone o repositório e acesse a pasta:**
-   ```bash
-   git clone <URL_DO_REPOSITORIO>
-   cd ecomshield-platform
-   ```
+O sistema e composto por servicos modulares orientados a microsservicos, garantindo alta disponibilidade, escalabilidade horizontal e isolamento de falhas criticas de processamento.
 
-2. **Configure as variáveis de ambiente:**
-   ```bash
-   cp .env.example .env
-   ```
+## Tecnologias Utilizadas
 
-3. **Inicie os serviços via Docker:**
-   ```bash
-   docker compose up -d
-   ```
+- **Backend:** Node.js / Python (conforme especificacao do modulo)
+- **Banco de Dados:** PostgreSQL / Redis
+- **Containerizacao:** Docker e Docker Compose
+- **Controle de Versao:** Git e GitHub
 
-4. **Acesse os serviços:**
-   - 📖 **Documentação Interativa (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-   - 📌 **Documentação Alternativa (ReDoc):** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-   - ❤️ **Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
-   - 🔑 **Credenciais do Administrador Padrão:**
-     - **Usuário:** `admin`
-     - **Senha:** `senha123`
+## Pre-requisitos
 
----
+Antes de iniciar, certifique-se de ter instalado em sua maquina:
 
-### Opção 2: Instalação Local (Sem Docker)
+- Git
+- Docker e Docker Compose (recomendado)
+- Node.js (versao 18 ou superior) ou Python (versao 3.10 ou superior)
 
-Se preferir rodar a aplicação localmente utilizando Python:
+## Quick Start
 
-1. **Crie e ative o ambiente virtual:**
-   - **Linux / macOS:**
-     ```bash
-     python3 -m venv .venv
-     source .venv/bin/activate
-     ```
-   - **Windows (PowerShell):**
-     ```powershell
-     python -m venv .venv
-     .venv\Scripts\activate
-     ```
+Siga os passos abaixo para colocar o projeto em execucao localmente em poucos minutos:
 
-2. **Instale TODAS as dependências com um único comando:**
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
-
-3. **Configure o arquivo `.env`:**
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Inicie o servidor de desenvolvimento:**
-   ```bash
-   python -m uvicorn src.main:app --reload
-   ```
-
-5. **Acesse a API em [http://127.0.0.1:8000](http://127.0.0.1:8000)**
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Linguagem & Framework:** Python 3.10+ / FastAPI
-- **Banco de Dados & ORM:** PostgreSQL 16 + SQLModel (SQLAlchemy)
-- **Autenticação & Segurança:** OAuth2 / JWT (python-jose, passlib, bcrypt)
-- **Data Science & EDA:** Pandas, NumPy, PyArrow, Matplotlib, Seaborn
-- **Ambientes de Desenvolvimento:** Docker & Docker Compose, Jupyter Notebook
-- **Testes & Qualidade:** Pytest, HTTPX, Ruff
-
----
-
-## 📦 Dependências do Projeto (`requirements.txt`)
-
-Todas as bibliotecas necessárias para rodar a API, executar o banco de dados, gerar as análises de dados e rodar a suíte de testes estão consolidadas no arquivo `requirements.txt`:
-
-```text
-# Core API: fastapi, uvicorn, pydantic, pydantic-settings, python-multipart
-# Auth: python-jose, passlib, bcrypt
-# Database: sqlmodel, psycopg2-binary
-# Data Science / EDA: pandas, pyarrow, numpy, matplotlib, seaborn
-# Notebooks: jupyter, ipykernel
-# Testing & Quality: pytest, httpx, ruff
-```
-
-Basta executar `pip install -r requirements.txt` para baixar tudo de uma vez.
-
----
-
-## 📁 Estrutura do Projeto
-
-```text
-ecomshield-platform/
-├── .env.example             # Modelo de variáveis de ambiente
-├── docker-compose.yml       # Configuração dos serviços Docker (PostgreSQL 16 + API)
-├── Dockerfile               # Build da imagem Docker da aplicação
-├── pyproject.toml           # Metadados e configurações do projeto
-├── requirements.txt         # Dependências completas consolidada do projeto
-├── README.md                # Documentação e Quickstart Guide
-├── data/
-│   ├── raw/                 # Dados brutos recebidos
-│   └── processed/           # Datasets processados em formato Parquet
-├── notebooks/               # Notebooks Jupyter de Análise Exploratória (EDA)
-│   └── 03_b2w_intent_eda.ipynb
-├── scripts/                 # Scripts auxiliares para ETL e amostragem
-│   ├── build_b2w_intent_dataset.py
-│   └── create_b2w_review_sample.py
-├── src/
-│   ├── main.py              # Ponto de entrada da API FastAPI
-│   └── app/
-│       ├── auth.py          # Autenticação JWT e controle de acesso RBAC
-│       ├── config.py        # Configurações globais da aplicação
-│       ├── database.py      # Conexão e inicialização do banco de dados relacional
-│       ├── seed.py          # Carga inicial do usuário administrador
-│       ├── models/          # Modelos relacionais SQLModel
-│       └── routers/         # Endpoints RESTful da API
-└── tests/                   # Suíte de testes automatizados com Pytest
-```
-
----
-
-## 🗄️ Banco de Dados Relacional (PostgreSQL)
-
-O projeto utiliza **SQLModel** para gerenciamento de banco de dados relacional PostgreSQL.
-
-### Principais Entidades:
-- **Users:** Cadastro de usuários e controle de funções (`admin`, `analyst`, `agent`, `customer`).
-- **RefundRequests:** Gestão de solicitações de reembolso e transações.
-- **RiskAssessments:** Análises e scores de risco detalhados por reembolso.
-- **AuditLogs:** Registros de auditoria para rastreabilidade de ações na plataforma.
-
-### Comandos do Docker Compose para o Banco:
-- **Verificar status:** `docker compose ps`
-- **Logs em tempo real:** `docker compose logs -f`
-- **Resetar banco de dados (remover volumes):** `docker compose down -v`
-
----
-
-## 🧪 Suíte de Testes
-
-Para executar os testes automatizados da API:
-
+1. Clone o repositorio:
 ```bash
-pytest
+git clone https://github.com/danielssaugusto/ecomshield-platform.git
 ```
 
----
-
-## 📊 Dataset & Análise Exploratória (B2W-Reviews01)
-
-A plataforma conta com um módulo de análise exploratória de intenções de suporte a clientes baseado no dataset público **B2W-Reviews01** (132.373 avaliações no e-commerce brasileiro).
-
-### Como reproduzir a preparação do dataset:
-
+2. Acesse o diretorio do projeto:
 ```bash
-mkdir -p data/raw/b2w-reviews01
-
-curl -L -o data/raw/b2w-reviews01/B2W-Reviews01.csv \
-  https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv
-
-python3 scripts/build_b2w_intent_dataset.py \
-  --input data/raw/b2w-reviews01/B2W-Reviews01.csv \
-  --output data/processed/b2w_reviews_intents.parquet \
-  --report data/processed/b2w_reviews_intents_report.json
+cd ecomshield-platform
 ```
 
----
+3. Crie um arquivo de configuracao de ambiente a partir do exemplo fornecido:
+```bash
+cp .env.example .env
+```
 
-## 📜 Licença
+4. Suba os servicos essenciais utilizando o Docker Compose:
+```bash
+docker-compose up -d
+```
+
+5. Instale as dependencias da aplicacao (caso execute fora do container):
+```bash
+npm install
+```
+
+6. Inicie a aplicacao em modo de desenvolvimento:
+```bash
+npm run dev
+```
+
+O servico estara disponivel por padrao na porta `3000` (ou na porta configurada no arquivo `.env`).
+
+## Configuracao
+
+As variaveis de ambiente fundamentais para a execucao do sistema estao listadas abaixo. Preencha-as corretamente no arquivo `.env`:
+
+- `PORT`: Porta de execucao do servidor.
+- `DATABASE_URL`: String de conexao com o banco de dados relacional.
+- `REDIS_URL`: URL de conexao com o servidor de cache/mensageria.
+
+## Contribuicao
+
+1. Faca um fork do repositorio.
+2. Crie uma branch para a sua feature (`git checkout -b feature/nome-da-feature`).
+3. Faca o commit das suas alteracoes (`git commit -m 'Adiciona nova funcionalidade'`).
+4. Faca o push para a branch (`git push origin feature/nome-da-feature`).
+5. Abra um Pull Request.
+
+## Licenca
 
 Este projeto e os datasets derivados utilizam a licença **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
