@@ -19,7 +19,9 @@ o quanto um modelo repete regras criadas pelo próprio projeto.
 O Bitext fornece 44.884 textos, 46 intenções e 13 categorias com rótulos
 originais. O processamento preserva esses valores, remove somente ausência de
 texto/rótulo e duplicatas exatas, e produz divisões determinísticas de
-treino/validação/teste (80/10/10).
+treino/validação/teste (aproximadamente 80/10/10).
+Textos idênticos são agrupados na mesma partição; a auditoria encontrou zero
+sobreposições textuais exatas entre partições após a correção do split.
 
 ## Resultados reprodutíveis
 
@@ -45,9 +47,25 @@ e 125 de adjudicação. Setenta e oito registros têm marca de incerteza e são
 preservados para auditoria, mas ficam fora da métrica principal. Restam 422
 registros elegíveis para avaliação externa.
 
+As decisões humanas foram preservadas em arquivo sem os textos das avaliações,
+com hashes de cada amostra e manifesto das planilhas originais. O script de
+reconstrução gera novamente o CSV final a partir do B2W fixado por revisão e
+SHA-256; a saída foi comparada byte a byte com a versão validada e teve o
+mesmo SHA-256. Entre 125 casos adjudicados, 84 não têm justificativa textual
+na planilha recebida. O motivo dessas decisões não pode ser recuperado sem
+nova consulta aos revisores. Os 78 incertos tampouco devem ser tratados como
+rótulos seguros.
+
+O B2W é publicado pela B2W Digital sob [CC BY-NC-SA 4.0](https://github.com/americanas-tech/b2w-reviews01),
+com atribuição, uso não comercial e compartilhamento pela mesma licença. O
+Bitext é publicado sob CDLA-Sharing-1.0 e se descreve como híbrido/sintético.
+
 ## Artefatos
 
 - `scripts/build_bitext_intent_dataset.py`
+- `scripts/download_b2w_reviews.py`
+- `scripts/export_ptbr_annotation_labels.py`
+- `scripts/rebuild_ptbr_validation_dataset.py`
 - `scripts/generate_b2w_feedback_eda.py`
 - `scripts/train_bitext_intent_baseline.py`
 - `scripts/create_ptbr_validation_queue.py`

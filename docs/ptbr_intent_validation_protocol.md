@@ -59,6 +59,23 @@ python scripts/finalize_ptbr_intent_dataset.py \
   --adjudication-workbook caminho/para/planilha_de_adjudicacao_preenchida.xlsx
 ```
 
+Nesta entrega, as duas planilhas já recebidas foram verificadas e suas decisões
+humanas foram exportadas, sem os textos originais, para
+`data/annotations/ptbr_human_labels.csv`. O manifesto adjacente registra os
+SHA-256 das planilhas, do arquivo de decisões e do CSV B2W. Para refazer a
+exportação a partir das planilhas, execute
+`scripts/export_ptbr_annotation_labels.py` com os caminhos das duas planilhas.
+Para reconstruir o dataset final sem precisar das planilhas, execute:
+
+```bash
+python scripts/rebuild_ptbr_validation_dataset.py
+python scripts/generate_ptbr_validation_eda.py
+```
+
+O reconstrutor confere as 500 amostras, hashes de texto, votos, adjudicações e
+taxonomia contra as fontes fixadas. Ele reproduziu exatamente o SHA-256 do CSV
+final previamente validado.
+
 ## Limites
 
 O B2W é uma fonte de avaliações reais, mas não publicou intenção como rótulo
@@ -66,3 +83,8 @@ original. Por isso, esta etapa demanda pessoas que dominem o domínio de
 e-commerce e o vocabulário dos rótulos. Até existir essa revisão humana, o
 resultado de 0,9887 de Macro F1 do Bitext permanece estritamente interno ao
 corpus de origem.
+
+No conjunto recebido, 78 casos foram marcados incertos e estão excluídos da
+amostra principal de 422. Entre 125 divergências adjudicadas, 84 não continham
+justificativa textual na planilha recebida. A decisão final está registrada,
+mas sua motivação não pode ser reconstituída sem os revisores; não a inventamos.

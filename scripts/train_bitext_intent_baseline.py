@@ -29,6 +29,9 @@ def main() -> None:
     test = frame[frame["split"] == "test"]
     if train.empty or test.empty:
         raise ValueError("O dataset precisa conter as partições train e test.")
+    duplicate_texts = set(train["text"]) & set(test["text"])
+    if duplicate_texts:
+        raise ValueError(f"Vazamento: {len(duplicate_texts)} textos idênticos em treino e teste.")
 
     model = Pipeline([
         ("tfidf", TfidfVectorizer(ngram_range=(1, 2), min_df=2, sublinear_tf=True, max_features=100_000)),
@@ -42,6 +45,7 @@ def main() -> None:
         "model": "TF-IDF (1,2-gram) + LogisticRegression",
         "train_rows": len(train),
         "test_rows": len(test),
+        "train_test_duplicate_texts": len(duplicate_texts),
         "accuracy": accuracy_score(test["intent"], predictions),
         "macro_f1": f1_score(test["intent"], predictions, average="macro"),
         "weighted_f1": f1_score(test["intent"], predictions, average="weighted"),
@@ -58,13 +62,19 @@ def main() -> None:
 
 - Modelo: TF-IDF (1–2 gramas) + Regressão Logística
 - Treino/teste: {len(train):,}/{len(test):,} registros
+- Textos idênticos em treino e teste: {len(duplicate_texts)}
 - Accuracy: {results['accuracy']:.4f}
 - Macro F1: {results['macro_f1']:.4f}
 - Weighted F1: {results['weighted_f1']:.4f}
 
 ## Interpretação responsável
 
-O teste usa uma partição isolada e estratificada; não há vazamento entre treino e teste. Ainda assim, o Bitext é um corpus em inglês e híbrido/sintético. Essas métricas não representam desempenho em reclamações brasileiras reais nem autorizam uso produtivo sem validação externa.
+O particionamento é estratificado por intenção e agrupa textos repetidos para
+evitar que a mesma solicitação apareça em treino e teste. A verificação acima
+conta sobreposições textuais exatas; não prova ausência de paráfrases ou outros
+tipos de vazamento semântico. O Bitext é um corpus em inglês e híbrido/sintético.
+Essas métricas não representam desempenho em reclamações brasileiras reais nem
+autorizam uso produtivo sem validação externa.
 """,
         encoding="utf-8",
     )

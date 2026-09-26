@@ -14,8 +14,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from download_b2w_reviews import SOURCE_URL, ensure_b2w_source
 
-SOURCE_URL = "https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv"
+
 TEXT_COLUMN = "feedback_text"
 
 
@@ -93,6 +94,15 @@ def make_figures(frame: pd.DataFrame, output: Path) -> None:
     plt.savefig(output / "05_comprimento_por_nota.png", dpi=160)
     plt.close()
 
+    plt.figure(figsize=(9, 5))
+    frame["text_length_chars"].clip(upper=1000).plot.hist(bins=40, color="#ea580c")
+    plt.xlabel("Caracteres no texto (valores acima de 1.000 agrupados)")
+    plt.ylabel("Avaliações")
+    plt.title("Distribuição do comprimento das avaliações")
+    plt.tight_layout()
+    plt.savefig(output / "06_histograma_comprimento_textos.png", dpi=160)
+    plt.close()
+
 
 def write_report(report: dict[str, object], output: Path) -> None:
     summary = report["summary"]
@@ -109,6 +119,7 @@ Bitext, que é o dataset usado para classificação de intenções.
 ## Integridade
 
 - Fonte: [B2W-Reviews01]({SOURCE_URL})
+- Licença da fonte: [CC BY-NC-SA 4.0](https://github.com/americanas-tech/b2w-reviews01); atribuição a B2W Digital, uso não comercial e compartilhamento pela mesma licença.
 - SHA-256: `{report["source_sha256"]}`
 - Linhas originais: {summary["raw_rows"]:,}
 - Textos vazios removidos: {summary["rows_removed_empty_text"]:,}
@@ -136,6 +147,7 @@ Bitext, que é o dataset usado para classificação de intenções.
 - `03_categorias_mais_avaliadas.png`
 - `04_volume_mensal.png`
 - `05_comprimento_por_nota.png`
+- `06_histograma_comprimento_textos.png`
 """,
         encoding="utf-8",
     )
@@ -147,7 +159,7 @@ def main() -> None:
     parser.add_argument("--report-json", type=Path, default=Path("data/processed/b2w_feedback_eda_report.json"))
     parser.add_argument("--report-md", type=Path, default=Path("reports/b2w_feedback/relatorio.md"))
     args = parser.parse_args()
-    raw = pd.read_csv(args.input, low_memory=False)
+    raw = pd.read_csv(ensure_b2w_source(args.input), low_memory=False)
     frame, removals = prepare(raw)
     filled_recommendations = frame["recommend_to_a_friend"].dropna().astype(str).str.lower()
     low = frame[frame["overall_rating"].isin([1, 2])]["text_length_chars"]

@@ -14,6 +14,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from download_b2w_reviews import ensure_b2w_source
+
 
 def normalized_feedback(frame: pd.DataFrame) -> pd.DataFrame:
     title = frame["review_title"].fillna("").astype(str)
@@ -29,6 +31,18 @@ def stable_id(text: str) -> str:
     return "b2w-" + hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
+def select_sample(raw: pd.DataFrame, per_rating: int = 100, seed: int = 42) -> pd.DataFrame:
+    """Select the same blinded, rating-balanced sample on every run."""
+    clean = normalized_feedback(raw)
+    parts: list[pd.DataFrame] = []
+    for rating in range(1, 6):
+        candidates = clean[clean["overall_rating"] == rating]
+        if len(candidates) < per_rating:
+            raise ValueError(f"Há somente {len(candidates)} avaliações com nota {rating}.")
+        parts.append(candidates.sample(n=per_rating, random_state=seed + rating))
+    return pd.concat(parts, ignore_index=True).sample(frac=1, random_state=seed).reset_index(drop=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=Path("data/raw/b2w-reviews01/B2W-Reviews01.csv"))
@@ -41,18 +55,11 @@ def main() -> None:
     if args.per_rating <= 0:
         raise ValueError("--per-rating precisa ser positivo.")
 
-    raw = pd.read_csv(args.input, low_memory=False)
+    raw = pd.read_csv(ensure_b2w_source(args.input), low_memory=False)
     bitext = pd.read_parquet(args.bitext_dataset)
     if not {"intent", "category"}.issubset(bitext.columns):
         raise ValueError("O dataset Bitext precisa conter as colunas intent e category.")
-    clean = normalized_feedback(raw)
-    parts: list[pd.DataFrame] = []
-    for rating in range(1, 6):
-        candidates = clean[clean["overall_rating"] == rating]
-        if len(candidates) < args.per_rating:
-            raise ValueError(f"Há somente {len(candidates)} avaliações com nota {rating}.")
-        parts.append(candidates.sample(n=args.per_rating, random_state=args.seed + rating))
-    sample = pd.concat(parts, ignore_index=True).sample(frac=1, random_state=args.seed).reset_index(drop=True)
+    sample = select_sample(raw, per_rating=args.per_rating, seed=args.seed)
     queue = pd.DataFrame({
         "sample_id": sample["feedback_text"].map(stable_id),
         "feedback_text": sample["feedback_text"],

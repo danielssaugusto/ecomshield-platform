@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import ssl
+import tempfile
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -21,10 +22,12 @@ import pandas as pd
 
 SOURCE_URL = (
     "https://huggingface.co/datasets/bitext/"
-    "Bitext-retail-ecommerce-llm-chatbot-training-dataset/resolve/main/"
+    "Bitext-retail-ecommerce-llm-chatbot-training-dataset/resolve/"
+    "12dd624ddcd3057382b2faad661bcda1fa869491/"
     "bitext-retail-ecommerce-llm-chatbot-training-dataset.csv?download=true"
 )
 SOURCE_DATASET = "bitext/Bitext-retail-ecommerce-llm-chatbot-training-dataset"
+SOURCE_SHA256 = "13a988266fed4e2b2c1ff947a89ef220ce09b5b13ac83c4a1496c0d7b81e8127"
 REQUIRED_COLUMNS = {"instruction", "intent", "category", "tags", "response"}
 
 
@@ -42,24 +45,46 @@ def clean_text(value: object) -> str:
 
 
 def download_source(url: str, output: Path) -> None:
-    """Download with certificate verification, including macOS Python installs."""
+    """Download atomically with certificate verification."""
     context = ssl.create_default_context(cafile=certifi.where())
-    with urlopen(url, context=context) as response, output.open("wb") as file:
-        while chunk := response.read(1024 * 1024):
-            file.write(chunk)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=output.parent, prefix=".bitext-", suffix=".part", delete=False) as file:
+            temporary_path = Path(file.name)
+            with urlopen(url, context=context, timeout=60) as response:
+                while chunk := response.read(1024 * 1024):
+                    file.write(chunk)
+        if sha256_file(temporary_path) != SOURCE_SHA256:
+            raise ValueError("O Bitext baixado não corresponde ao SHA-256 fixado.")
+        temporary_path.replace(output)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
 
 
 def stable_splits(frame: pd.DataFrame) -> pd.Series:
-    """Create deterministic 80/10/10 splits within every original intent."""
+    """Split by intent while keeping every repeated text in one partition."""
     assignments = pd.Series(index=frame.index, dtype="string")
-    for _, group in frame.groupby("intent", sort=True):
-        ordered = group.sort_values("record_id")
-        count = len(ordered)
-        test_size = max(1, round(count * 0.10))
-        validation_size = max(1, round(count * 0.10))
-        assignments.loc[ordered.index[:test_size]] = "test"
-        assignments.loc[ordered.index[test_size : test_size + validation_size]] = "validation"
-        assignments.loc[ordered.index[test_size + validation_size :]] = "train"
+    if frame.groupby("text")["intent"].nunique().gt(1).any():
+        raise ValueError("Há textos idênticos com intenções diferentes; revise os rótulos antes da divisão.")
+    for _, intent_rows in frame.groupby("intent", sort=True):
+        text_groups = sorted(
+            (group for _, group in intent_rows.groupby("text", sort=False)),
+            key=lambda group: group["record_id"].min(),
+        )
+        target_test = max(1, round(len(intent_rows) * 0.10))
+        target_validation = max(1, round(len(intent_rows) * 0.10))
+        test_rows = validation_rows = 0
+        for group in text_groups:
+            if test_rows < target_test:
+                split = "test"
+                test_rows += len(group)
+            elif validation_rows < target_validation:
+                split = "validation"
+                validation_rows += len(group)
+            else:
+                split = "train"
+            assignments.loc[group.index] = split
     return assignments
 
 
@@ -113,6 +138,7 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
 | --- | ---: |
 | Valores ausentes nos campos de treino (`text`, `category`, `intent`) | 0 |
 | Duplicatas exatas no dataset final | 0 |
+| Textos idênticos em partições diferentes | {report["cross_split_duplicate_texts"]} |
 | Comprimento mediano do texto | {text_length["median"]:.0f} caracteres |
 | Comprimento médio do texto | {text_length["mean"]:.1f} caracteres |
 | Percentil 95 do comprimento | {text_length["p95"]:.0f} caracteres |
@@ -123,15 +149,21 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
    As categorias `DELIVERY`, `PRODUCT` e `RETURNS` somam
    {hypothesis["core_categories"]["records"]:,} registros
    ({hypothesis["core_categories"]["percent"]:.2f}%).
-2. **As classes são adequadamente balanceadas para avaliação multiclasse.** A
-   menor classe possui {hypothesis["intent_balance"]["min_count"]:,} exemplos
-   e a maior {hypothesis["intent_balance"]["max_count"]:,}; razão
-   máxima/mínima de {hypothesis["intent_balance"]["ratio"]:.2f}.
-3. **Nenhuma intenção fica ausente da validação ou teste.** Todas as
-   {report["intent_total"]} intenções aparecem em `train`, `validation` e `test`.
-4. **Há variação de extensão que deve orientar o limite de tokens do modelo.**
-   O percentil 95 é {text_length["p95"]:.0f} caracteres; qualquer truncamento
-   adotado no treinamento deve ser documentado.
+2. **Solicitações de devolução são mais frequentes do que feedback de produto.**
+   `RETURNS` tem {hypothesis["returns_vs_feedback"]["returns"]:,} registros,
+   contra {hypothesis["returns_vs_feedback"]["feedback"]:,} em `FEEDBACK`
+   (razão {hypothesis["returns_vs_feedback"]["ratio"]:.2f}).
+3. **Problemas, prazo e rastreamento concentram intenções de entrega.**
+   `delivery_issue`, `delivery_time` e `track_delivery` somam
+   {hypothesis["delivery_issue_time_tracking"]["records"]:,} registros,
+   {hypothesis["delivery_issue_time_tracking"]["percent_of_delivery"]:.2f}%
+   da categoria `DELIVERY`.
+
+As classes têm entre {hypothesis["intent_balance"]["min_count"]:,} e
+{hypothesis["intent_balance"]["max_count"]:,} exemplos. Todas as
+{report["intent_total"]} intenções aparecem em `train`, `validation` e `test`.
+O percentil 95 de extensão é {text_length["p95"]:.0f} caracteres; qualquer
+truncamento no treinamento deve ser documentado.
 
 ## Categorias
 
@@ -157,6 +189,7 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
 - `02_distribuicao_intencoes.png`
 - `03_comprimento_textos_por_categoria.png`
 - `04_particoes_por_categoria.png`
+- `05_histograma_comprimento_textos.png`
 """,
         encoding="utf-8",
     )
@@ -190,7 +223,7 @@ def create_eda_figures(final: pd.DataFrame, report_dir: Path) -> None:
     categories = sorted(lengths["category"].unique())
     values = [lengths.loc[lengths["category"] == category, "text_length_chars"] for category in categories]
     plt.figure(figsize=(12, 6))
-    plt.boxplot(values, labels=categories, showfliers=False)
+    plt.boxplot(values, tick_labels=categories, showfliers=False)
     plt.xticks(rotation=45, ha="right")
     plt.ylabel("Caracteres no texto")
     plt.title("Comprimento do texto por categoria")
@@ -212,12 +245,25 @@ def create_eda_figures(final: pd.DataFrame, report_dir: Path) -> None:
     plt.savefig(report_dir / "04_particoes_por_categoria.png", dpi=160)
     plt.close()
 
+    plt.figure(figsize=(9, 5))
+    lengths["text_length_chars"].clip(upper=1000).plot.hist(bins=40, color="#ea580c")
+    plt.xlabel("Caracteres no texto (valores acima de 1.000 agrupados)")
+    plt.ylabel("Solicitações")
+    plt.title("Distribuição do comprimento das solicitações")
+    plt.tight_layout()
+    plt.savefig(report_dir / "05_histograma_comprimento_textos.png", dpi=160)
+    plt.close()
+
 
 def build(input_path: Path, processed_path: Path, report_path: Path, report_md: Path) -> None:
     if not input_path.exists() or input_path.stat().st_size == 0:
         input_path.parent.mkdir(parents=True, exist_ok=True)
         print(f"Baixando {SOURCE_DATASET}…")
         download_source(SOURCE_URL, input_path)
+
+    source_hash = sha256_file(input_path)
+    if source_hash != SOURCE_SHA256:
+        raise ValueError(f"Bitext SHA-256 inesperado em {input_path}: {source_hash}")
 
     raw = pd.read_csv(input_path, dtype="string", keep_default_na=False)
     missing_columns = REQUIRED_COLUMNS.difference(raw.columns)
@@ -243,6 +289,8 @@ def build(input_path: Path, processed_path: Path, report_path: Path, report_md: 
     )
     deduplicated["source_dataset"] = SOURCE_DATASET
     deduplicated["split"] = stable_splits(deduplicated)
+    if deduplicated.groupby("text")["split"].nunique().gt(1).any():
+        raise AssertionError("A divisão colocou textos idênticos em partições diferentes.")
     final = deduplicated[
         ["record_id", "source_dataset", "text", "category", "intent", "tags", "response", "split"]
     ].sort_values(["split", "intent", "record_id"])
@@ -255,6 +303,11 @@ def build(input_path: Path, processed_path: Path, report_path: Path, report_md: 
     split_counts = final["split"].value_counts().reindex(["train", "validation", "test"]).to_dict()
     text_lengths = final["text"].str.len()
     core_categories = final[final["category"].isin(["DELIVERY", "PRODUCT", "RETURNS"])]
+    returns_count = category_counts["RETURNS"]
+    feedback_count = category_counts["FEEDBACK"]
+    delivery_focus_count = sum(
+        intent_counts[name] for name in ["delivery_issue", "delivery_time", "track_delivery"]
+    )
     minimum_intent_count = min(intent_counts.values())
     maximum_intent_count = max(intent_counts.values())
     report = {
@@ -262,7 +315,7 @@ def build(input_path: Path, processed_path: Path, report_path: Path, report_md: 
         "source_dataset": SOURCE_DATASET,
         "source_url": SOURCE_URL,
         "source_license": "CDLA-Sharing-1.0",
-        "source_sha256": sha256_file(input_path),
+        "source_sha256": source_hash,
         "raw_rows": raw_rows,
         "rows_removed_missing": rows_removed_missing,
         "rows_removed_duplicates": rows_removed_duplicates,
@@ -270,6 +323,7 @@ def build(input_path: Path, processed_path: Path, report_path: Path, report_md: 
         "category_counts": category_counts,
         "intent_counts": intent_counts,
         "split_counts": split_counts,
+        "cross_split_duplicate_texts": int(final.groupby("text")["split"].nunique().gt(1).sum()),
         "intent_total": len(intent_counts),
         "text_length_chars": {
             "min": int(text_lengths.min()),
@@ -282,6 +336,15 @@ def build(input_path: Path, processed_path: Path, report_path: Path, report_md: 
             "core_categories": {
                 "records": len(core_categories),
                 "percent": len(core_categories) / len(final) * 100,
+            },
+            "returns_vs_feedback": {
+                "returns": returns_count,
+                "feedback": feedback_count,
+                "ratio": returns_count / feedback_count,
+            },
+            "delivery_issue_time_tracking": {
+                "records": delivery_focus_count,
+                "percent_of_delivery": delivery_focus_count / category_counts["DELIVERY"] * 100,
             },
             "intent_balance": {
                 "min_count": minimum_intent_count,

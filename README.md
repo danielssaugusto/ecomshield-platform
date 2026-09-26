@@ -5,11 +5,36 @@ e-commerce. A estratégia de dados separa explicitamente duas finalidades:
 
 | Finalidade | Dataset | Como é usado |
 | --- | --- | --- |
-| Feedback real e análise exploratória | B2W-Reviews01 | Avaliações reais em PT-BR; EDA, sentimento e análise de risco. Não é usado como variável-alvo de intenção. |
+| Feedback real e análise exploratória | B2W-Reviews01 | Avaliações reais em PT-BR; EDA, satisfação e amostra para validação humana. A nota não é usada como variável-alvo de intenção. |
 | Classificação de intenção | Bitext Retail eCommerce | Corpus rotulado com os campos originais `instruction`, `category` e `intent`. |
 
 Essa divisão evita a criação de intenções por heurísticas de palavras-chave. O
 modelo de intenção deve usar apenas o campo `intent` publicado pelo Bitext.
+
+## Reproduzir a parte de dados
+
+Use Python 3.10 ou superior. As dependências abaixo são exclusivas desta parte
+e não exigem instalar ou executar a API ou o banco:
+
+```bash
+python3 -m venv .venv-data
+source .venv-data/bin/activate
+python -m pip install -r requirements-data.txt
+python scripts/download_b2w_reviews.py
+python scripts/build_bitext_intent_dataset.py
+python scripts/rebuild_ptbr_validation_dataset.py
+python scripts/generate_b2w_feedback_eda.py
+python scripts/generate_ptbr_validation_eda.py
+python scripts/train_bitext_intent_baseline.py
+```
+
+Execute os notebooks `03` a `06` em ordem após os comandos. Os dois downloads
+são fixados a revisões específicas e verificados por SHA-256. Os CSVs brutos e
+derivados permanecem fora do Git; o arquivo versionado
+`data/annotations/ptbr_human_labels.csv` guarda apenas decisões humanas e hashes
+dos textos, não as avaliações originais. Seu manifesto documenta os hashes das
+duas planilhas fornecidas pelos revisores. Os relatórios gerados resumem cada
+etapa e as limitações metodológicas.
 
 ## Dataset de intenção
 
@@ -34,7 +59,8 @@ O comando gera, localmente e sem versionar dados brutos:
 
 As categorias e intenções não são renomeadas, inferidas ou combinadas pelo
 pipeline. A divisão `train`/`validation`/`test` é estratificada por intenção e
-determinística (80/10/10).
+determinística (aproximadamente 80/10/10). Textos idênticos permanecem na
+mesma partição, evitando vazamento exato entre treino, validação e teste.
 
 Para treinar e avaliar um baseline transparente, exclusivamente no Bitext:
 
@@ -53,6 +79,11 @@ O B2W-Reviews01 permanece como fonte complementar de avaliações reais em
 português. Artefatos antigos que contêm rótulos por heurística não devem ser
 usados para treinamento ou avaliação do classificador de intenção; são apenas
 histórico da exploração inicial.
+
+A fonte é o [B2W-Reviews01 da B2W Digital](https://github.com/americanas-tech/b2w-reviews01),
+distribuído sob [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+O uso deve ser não comercial, com atribuição e compartilhamento pela mesma
+licença. O CSV original não é versionado neste repositório.
 
 Para regenerar a EDA do B2W sem criar intenções artificiais:
 
@@ -74,8 +105,10 @@ anotação e a métrica de concordância estão em
 python scripts/create_ptbr_validation_queue.py
 ```
 
-São necessárias duas anotações humanas independentes e a adjudicação das
-divergências antes de chamar o conjunto de dados de validado.
+As 500 avaliações já receberam duas anotações humanas independentes e 125
+divergências foram adjudicadas. Para reproduzir o CSV final a partir das
+decisões versionadas, use `scripts/rebuild_ptbr_validation_dataset.py`. Isso
+não recria decisões humanas ausentes nem transforma casos incertos em certeza.
 
 O panorama completo e as limitações da entrega de dados estão em
 [`reports/data_methodology/relatorio.md`](reports/data_methodology/relatorio.md).
@@ -202,6 +235,3 @@ FastAPI automatically generates interactive API documentation.
 
 > [!NOTE]
 > The `--reload` option is intended for development environments. It should not be used in production.
-
-**Note:** The dataset used in this project is publicly available and is not included in this repository due to size and licensing considerations.  
-[link para o dataset](editar com o link para o dataset original)

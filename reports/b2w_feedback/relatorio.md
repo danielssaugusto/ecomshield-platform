@@ -10,6 +10,7 @@ Bitext, que é o dataset usado para classificação de intenções.
 ## Integridade
 
 - Fonte: [B2W-Reviews01](https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv)
+- Licença da fonte: [CC BY-NC-SA 4.0](https://github.com/americanas-tech/b2w-reviews01); atribuição a B2W Digital, uso não comercial e compartilhamento pela mesma licença.
 - SHA-256: `821fb0bf9f7230b0fba4e4f9fadd75a66d1a9ff0b1657810791d33007eb2ab38`
 - Linhas originais: 132,373
 - Textos vazios removidos: 72
@@ -37,3 +38,4 @@ Bitext, que é o dataset usado para classificação de intenções.
 - `03_categorias_mais_avaliadas.png`
 - `04_volume_mensal.png`
 - `05_comprimento_por_nota.png`
+- `06_histograma_comprimento_textos.png`

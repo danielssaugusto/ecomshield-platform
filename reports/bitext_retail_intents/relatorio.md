@@ -38,6 +38,7 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
 | --- | ---: |
 | Valores ausentes nos campos de treino (`text`, `category`, `intent`) | 0 |
 | Duplicatas exatas no dataset final | 0 |
+| Textos idênticos em partições diferentes | 0 |
 | Comprimento mediano do texto | 58 caracteres |
 | Comprimento médio do texto | 58.3 caracteres |
 | Percentil 95 do comprimento | 84 caracteres |
@@ -48,15 +49,21 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
    As categorias `DELIVERY`, `PRODUCT` e `RETURNS` somam
    20,199 registros
    (45.00%).
-2. **As classes são adequadamente balanceadas para avaliação multiclasse.** A
-   menor classe possui 721 exemplos
-   e a maior 1,000; razão
-   máxima/mínima de 1.39.
-3. **Nenhuma intenção fica ausente da validação ou teste.** Todas as
-   46 intenções aparecem em `train`, `validation` e `test`.
-4. **Há variação de extensão que deve orientar o limite de tokens do modelo.**
-   O percentil 95 é 84 caracteres; qualquer truncamento
-   adotado no treinamento deve ser documentado.
+2. **Solicitações de devolução são mais frequentes do que feedback de produto.**
+   `RETURNS` tem 6,925 registros,
+   contra 2,980 em `FEEDBACK`
+   (razão 2.32).
+3. **Problemas, prazo e rastreamento concentram intenções de entrega.**
+   `delivery_issue`, `delivery_time` e `track_delivery` somam
+   2,912 registros,
+   44.15%
+   da categoria `DELIVERY`.
+
+As classes têm entre 721 e
+1,000 exemplos. Todas as
+46 intenções aparecem em `train`, `validation` e `test`.
+O percentil 95 de extensão é 84 caracteres; qualquer
+truncamento no treinamento deve ser documentado.
 
 ## Categorias
 
@@ -141,3 +148,4 @@ E-ComShield não cria rótulos por palavras-chave, nota ou heurística.
 - `02_distribuicao_intencoes.png`
 - `03_comprimento_textos_por_categoria.png`
 - `04_particoes_por_categoria.png`
+- `05_histograma_comprimento_textos.png`
