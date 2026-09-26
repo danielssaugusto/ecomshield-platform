@@ -38,9 +38,12 @@ def test_eda_generates_all_artifacts(tmp_path, monkeypatch):
         "05_coocorrencias.png",
         "06_evolucao_mensal.png",
         "07_distribuicao_sentimento.png",
+<<<<<<< HEAD
         "08_heatmap_correlacao.png",
         "09_scatter_tamanho_vs_nota.png",
         "10_teste_hipotese_tamanho_texto.png",
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
         "relatorio.md",
     }
     assert {path.name for path in output_dir.iterdir()} == expected

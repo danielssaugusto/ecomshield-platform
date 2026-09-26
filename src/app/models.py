@@ -12,7 +12,11 @@ Schemas (plain):      Token, TokenData, UserCreate, UserRead,
 from datetime import UTC, datetime
 from enum import Enum
 
+<<<<<<< HEAD
 from pydantic import BaseModel, ConfigDict
+=======
+from pydantic import BaseModel
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 from sqlmodel import Field, Relationship, SQLModel
 
 # ──────────────────────────────────────────────────────────
@@ -36,7 +40,10 @@ class RefundStatus(str, Enum):
 # ──────────────────────────────────────────────────────────
 
 class User(SQLModel, table=True):
+<<<<<<< HEAD
     # pyrefly: ignore [bad-override]
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     __tablename__ = "users"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -56,7 +63,10 @@ class User(SQLModel, table=True):
 
 
 class Review(SQLModel, table=True):
+<<<<<<< HEAD
     # pyrefly: ignore [bad-override]
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     __tablename__ = "reviews"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -76,7 +86,10 @@ class Review(SQLModel, table=True):
 
 
 class Prediction(SQLModel, table=True):
+<<<<<<< HEAD
     # pyrefly: ignore [bad-override]
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     __tablename__ = "predictions"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -94,7 +107,10 @@ class Prediction(SQLModel, table=True):
 
 
 class RefundRequest(SQLModel, table=True):
+<<<<<<< HEAD
     # pyrefly: ignore [bad-override]
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     __tablename__ = "refund_requests"
 
     id: int | None = Field(default=None, primary_key=True)
@@ -128,8 +144,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
 
+<<<<<<< HEAD
     model_config = ConfigDict(extra="forbid")
 
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 # ── User ──────────────────────────────────────────────────
 
@@ -139,8 +158,11 @@ class UserCreate(BaseModel):
     password: str
     role: UserRole = UserRole.viewer
 
+<<<<<<< HEAD
     model_config = ConfigDict(extra="forbid")
 
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 class UserRead(BaseModel):
     id: int
@@ -150,7 +172,11 @@ class UserRead(BaseModel):
     disabled: bool
     created_at: datetime
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    model_config = {"from_attributes": True}
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 
 # ── Review ────────────────────────────────────────────────
@@ -163,8 +189,11 @@ class ReviewCreate(BaseModel):
     intent: str | None = None
     sentiment: str | None = None
 
+<<<<<<< HEAD
     model_config = ConfigDict(extra="forbid")
 
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 class ReviewRead(BaseModel):
     id: int
@@ -177,7 +206,11 @@ class ReviewRead(BaseModel):
     sentiment: str | None
     created_at: datetime
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    model_config = {"from_attributes": True}
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 
 # ── Prediction ────────────────────────────────────────────
@@ -191,7 +224,11 @@ class PredictionRead(BaseModel):
     model_version: str | None
     created_at: datetime
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    model_config = {"from_attributes": True}
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 
 # ── RefundRequest ─────────────────────────────────────────
@@ -201,8 +238,11 @@ class RefundRequestCreate(BaseModel):
     reason: str
     amount: float = Field(ge=0.0)
 
+<<<<<<< HEAD
     model_config = ConfigDict(extra="forbid")
 
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 class RefundRequestRead(BaseModel):
     id: int
@@ -214,11 +254,19 @@ class RefundRequestRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    model_config = {"from_attributes": True}
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 
 class RefundRequestUpdate(BaseModel):
     status: RefundStatus | None = None
+<<<<<<< HEAD
     reason: str | None = None
 
     model_config = ConfigDict(extra="forbid")
+=======
+    reason: str | None = None
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87

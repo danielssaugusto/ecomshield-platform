@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+<<<<<<< HEAD
     # CORS
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
@@ -19,6 +20,8 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

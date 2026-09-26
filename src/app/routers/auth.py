@@ -8,12 +8,19 @@ from src.app.auth import create_access_token, get_password_hash, verify_password
 from src.app.config import settings
 from src.app.database import get_session
 from src.app.models import Token, User, UserCreate, UserRead
+<<<<<<< HEAD
 from src.app.rate_limiter import auth_rate_limiter
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 
+<<<<<<< HEAD
 @router.post("/token", response_model=Token, dependencies=[Depends(auth_rate_limiter)])
+=======
+@router.post("/token", response_model=Token)
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),

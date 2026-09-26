@@ -11,10 +11,15 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from scipy import stats
+=======
+import pandas as pd
+import seaborn as sns
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 REQUIRED_COLUMNS = {
     "submission_date", "text", "intent", "intent_matches", "label_source", "overall_rating", "sentiment", "sentiment_source",
@@ -129,6 +134,7 @@ def plot_monthly_trends(data: pd.DataFrame, output_dir: Path, intent_summary: pd
     save_figure(output_dir, "06_evolucao_mensal.png")
 
 
+<<<<<<< HEAD
 def plot_correlation_heatmap(data: pd.DataFrame, output_dir: Path) -> pd.DataFrame:
     """Generate correlation heatmap across numeric and encoded features."""
     encoded = pd.DataFrame({
@@ -231,6 +237,15 @@ def write_report(
         "# Relatório de EDA Avançada — B2W Intents v4", "",
         "Este relatório é gerado automaticamente por `scripts/generate_b2w_eda.py` com análise estatística formal e visualizações avançadas.", "",
         "## Integridade e Visão Geral", "",
+=======
+def write_report(data: pd.DataFrame, output_dir: Path, coverage: pd.DataFrame, intents: pd.DataFrame, sentiments: pd.DataFrame, pairs: pd.DataFrame) -> None:
+    temporal = data["submission_date"].dropna()
+    multi_intent = data["intent_matches"].fillna("").str.contains("\\|").sum()
+    lines = [
+        "# Relatório de EDA — B2W Intents v4", "",
+        "Este relatório é gerado automaticamente por `scripts/generate_b2w_eda.py`.", "",
+        "## Integridade", "",
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
         f"- Registros: {len(data):,}",
         f"- Duplicatas exatas no Parquet: {data.duplicated().sum():,}",
         f"- Texto vazio: {data['text'].fillna('').str.strip().eq('').sum():,}",
@@ -246,6 +261,7 @@ def write_report(
     if not pairs.empty:
         lines += ["", "## Coocorrências principais", "", "| Par | Registros |", "| --- | ---: |"]
         lines += [f"| {row.par} | {row.registros:,} |" for row in pairs.itertuples(index=False)]
+<<<<<<< HEAD
     
     # Statistical Hypothesis Section
     lines += [
@@ -266,6 +282,8 @@ def write_report(
         "**Conclusão de Negócio**: Mensagens extensas em e-commerce são um indicador preditivo crítico de atrito grave e insatisfação, devendo priorizar a fila de atendimento operacional do EcomShield.",
     ]
     
+=======
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     (output_dir / "relatorio.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -284,10 +302,14 @@ def main() -> None:
     sentiments = plot_sentiment(data, args.output_dir)
     pairs = plot_cooccurrence(data, args.output_dir)
     plot_monthly_trends(data, args.output_dir, intents)
+<<<<<<< HEAD
     plot_correlation_heatmap(data, args.output_dir)
     plot_scatter_plots(data, args.output_dir)
     ht_results = perform_hypothesis_tests(data, args.output_dir)
     write_report(data, args.output_dir, coverage, intents, sentiments, pairs, ht_results)
+=======
+    write_report(data, args.output_dir, coverage, intents, sentiments, pairs)
+>>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     print(f"EDA gerada em: {args.output_dir}")
 
 
