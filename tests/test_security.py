@@ -1,0 +1,136 @@
+import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel.pool import StaticPool
+
+from src.app.auth import create_access_token, get_password_hash
+from src.app.database import get_session
+from src.app.models import User, UserRole, RefundRequest, Review
+from src.app.rate_limiter import auth_rate_limiter
+from src.main import app
+
+
+@pytest.fixture(name="session")
+def session_fixture():
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+
+
+@pytest.fixture(name="client")
+def client_fixture(session: Session):
+    def get_session_override():
+        yield session
+
+    app.dependency_overrides[get_session] = get_session_override
+    auth_rate_limiter.reset()
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
+    auth_rate_limiter.reset()
+
+
+def create_test_user(session: Session, username: str, email: str, role: UserRole = UserRole.viewer) -> User:
+    user = User(
+        username=username,
+        email=email,
+        hashed_password=get_password_hash("password123"),
+        role=role,
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def get_auth_header(username: str) -> dict[str, str]:
+    token = create_access_token(data={"sub": username})
+    return {"Authorization": f"Bearer {token}"}
+
+
+# ── (a) Tentativa de acesso sem token ──────────────────────────────────────────
+
+def test_unauthorized_access_without_token(client: TestClient):
+    response = client.get("/users/me")
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+    response_refunds = client.get("/refunds/")
+    assert response_refunds.status_code == 401
+
+
+# ── (b) Tentativa de acesso a recurso de outro usuário (BOLA) ─────────
+
+def test_bola_access_other_user_resource_forbidden(client: TestClient, session: Session):
+    user_a = create_test_user(session, "usera", "usera@example.com")
+    user_b = create_test_user(session, "userb", "userb@example.com")
+
+    # User B's refund request
+    refund_b = RefundRequest(
+        user_id=user_b.id,
+        order_id="ORD-1002",
+        reason="Defeito",
+        amount=150.0,
+    )
+    session.add(refund_b)
+    session.commit()
+    session.refresh(refund_b)
+
+    # User A attempts to access User B's profile
+    headers_a = get_auth_header(user_a.username)
+    resp_user = client.get(f"/users/{user_b.id}", headers=headers_a)
+    assert resp_user.status_code == 403
+    assert "Sem permissão" in resp_user.json()["detail"]
+
+    # User A attempts to access User B's refund request
+    resp_refund = client.get(f"/refunds/{refund_b.id}", headers=headers_a)
+    assert resp_refund.status_code == 403
+    assert "Sem permissão" in resp_refund.json()["detail"]
+
+
+# ── (c) Envio de campo extra no body da request (Pydantic extra='forbid') ──────
+
+def test_extra_fields_in_request_body_rejected(client: TestClient):
+    payload = {
+        "username": "newuser",
+        "email": "newuser@example.com",
+        "password": "strongpassword123",
+        "extra_unauthorized_field": "hacked_value",
+    }
+    response = client.post("/auth/register", json=payload)
+    assert response.status_code == 422
+    errors = response.json()["detail"]
+    assert any(err.get("type") == "extra_forbidden" for err in errors)
+
+
+# ── Additional Security Verification Tests ────────────────────────────────────
+
+def test_rate_limiting_on_auth_token_endpoint(client: TestClient, session: Session):
+    create_test_user(session, "rateuser", "rateuser@example.com")
+    form_data = {"username": "rateuser", "password": "wrongpassword"}
+
+    # Exceed limit of 5 requests
+    for _ in range(5):
+        client.post("/auth/token", data=form_data)
+
+    # 6th attempt should be blocked by Rate Limiter (429)
+    response = client.post("/auth/token", data=form_data)
+    assert response.status_code == 429
+    assert "Retry-After" in response.headers
+    assert "excedido" in response.json()["detail"]
+
+
+def test_security_headers_and_cors_middleware(client: TestClient):
+    response = client.get("/health", headers={"Origin": "http://localhost:3000"})
+    assert response.status_code == 200
+    assert response.headers["Strict-Transport-Security"] == "max-age=31536000; includeSubDomains"
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["X-XSS-Protection"] == "1; mode=block"
+    assert response.headers["Content-Security-Policy"] == "default-src 'self'; frame-ancestors 'none';"
+    assert response.headers["Access-Control-Allow-Origin"] == "http://localhost:3000"

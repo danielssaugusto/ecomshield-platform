@@ -1,0 +1,43 @@
+[project]
+name = "ecomshield"
+version = "0.1.0"
+description = "Secure e-commerce refund and risk management platform"
+requires-python = ">=3.14.4"
+
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "python-multipart",
+    "sqlmodel",
+    "psycopg2-binary",
+    "pandas",
+    "pyarrow",
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    "jupyter"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+    "ruff"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+ignore = ["B008"]
+
+[tool.pyrefly]
+search-path = ["."]

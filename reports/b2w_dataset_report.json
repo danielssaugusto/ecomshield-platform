@@ -1,0 +1,66 @@
+{
+  "dataset_version": "b2w-reviews01-intents-v4",
+  "source_url": "https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv",
+  "source_sha256": "821fb0bf9f7230b0fba4e4f9fadd75a66d1a9ff0b1657810791d33007eb2ab38",
+  "raw_rows": 132373,
+  "rows_after_empty_text_removal": 132261,
+  "rows_after_exact_deduplication": 131307,
+  "rows_removed_empty_text": 112,
+  "rows_removed_exact_duplicates": 954,
+  "intent_counts": {
+    "atendimento": 2053,
+    "atraso_entrega": 12141,
+    "avaliacao_geral": 54932,
+    "avaria_entrega": 443,
+    "cancelamento": 1369,
+    "cobranca_pagamento": 787,
+    "custo_beneficio": 7187,
+    "divergencia_anuncio": 759,
+    "duvida_produto": 717,
+    "embalagem_danificada": 45,
+    "entrega_antecipada": 10518,
+    "entrega_no_prazo": 4186,
+    "estorno_reembolso": 1680,
+    "frete": 755,
+    "informacao_anuncio": 215,
+    "item_faltante": 690,
+    "produto_defeituoso": 4476,
+    "produto_incorreto": 280,
+    "qualidade_produto": 14094,
+    "suspeita_autenticidade": 475,
+    "tamanho_dimensoes": 4874,
+    "troca_devolucao": 3641,
+    "uso_desempenho": 4990
+  },
+  "label_source_counts": {
+    "generic_topic_fallback_v1": 54932,
+    "keyword_heuristic_v4": 76375
+  },
+  "sentiment_counts": {
+    "misto": 2947,
+    "negativo": 31236,
+    "neutro": 11270,
+    "positivo": 85854
+  },
+  "sentiment_source_counts": {
+    "keyword_heuristic_v1": 82702,
+    "rating_fallback_v1": 48605
+  },
+  "multi_intent_rows": 22695,
+  "columns": [
+    "dataset_version",
+    "source_row_id",
+    "submission_date",
+    "product_id",
+    "product_category",
+    "product_subcategory",
+    "overall_rating",
+    "recommend_to_a_friend",
+    "text",
+    "intent",
+    "intent_matches",
+    "label_source",
+    "sentiment",
+    "sentiment_source"
+  ]
+}
