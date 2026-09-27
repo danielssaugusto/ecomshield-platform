@@ -27,13 +27,10 @@ from reportlab.platypus import (
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "output" / "pdf" / "nathalia_artigas_PB_TP2.PDF"
-BRANCH_URL = (
-    "https://github.com/danielssaugusto/ecomshield-platform/tree/"
-    "feature/integracao-tp2-dados-seguranca"
-)
+REPO_URL = "https://github.com/danielssaugusto/ecomshield-platform/tree/main"
 REPORT_URL = (
     "https://github.com/danielssaugusto/ecomshield-platform/blob/"
-    "feature/integracao-tp2-dados-seguranca/reports/relatorio_owasp_zap.md"
+    "main/reports/relatorio_owasp_zap.md"
 )
 ZAP_HTML_URL = REPORT_URL.replace("relatorio_owasp_zap.md", "zap_report.html")
 
@@ -153,7 +150,10 @@ def footer(canvas, doc) -> None:
     canvas.line(18 * mm, 16 * mm, width - 18 * mm, 16 * mm)
     canvas.setFont("ArialTP2", 8)
     canvas.setFillColor(colors.HexColor("#596b80"))
-    canvas.drawString(18 * mm, 11 * mm, "Nathalia Artigas | E-ComShield | TP2")
+    canvas.drawString(
+        18 * mm, 11 * mm,
+        "Nathalia Calazans Artigas e Daniel Augusto da Silva | E-ComShield | TP2",
+    )
     canvas.drawRightString(width - 18 * mm, 11 * mm, str(doc.page))
     canvas.restoreState()
 
@@ -165,16 +165,20 @@ def build() -> Path:
     doc = SimpleDocTemplate(
         str(OUTPUT), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
         topMargin=18 * mm, bottomMargin=23 * mm,
-        title="Nathalia Artigas - Projeto de Bloco - TP2",
-        author="Nathalia Artigas",
+        title="E-ComShield - Projeto de Bloco - TP2",
+        author="Nathalia Calazans Artigas; Daniel Augusto da Silva",
     )
     content = []
 
     # Page 1 - scope and provenance.
     content += [
         para("Projeto de Bloco - TP2", css["title"]),
-        para("E-ComShield | Análise exploratória e segurança da API<br/>"
-             "Nathalia Artigas | 27 de setembro de 2026", css["subtitle"]),
+        para(
+            "E-ComShield | Análise exploratória e segurança da API<br/>"
+            "Autores: Nathalia Calazans Artigas e Daniel Augusto da Silva<br/>"
+            "27 de setembro de 2026",
+            css["subtitle"],
+        ),
         HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#3b77a4")),
         para("Problema e objetivo", css["h1"]),
         para(
@@ -325,7 +329,7 @@ def build() -> Path:
         bullet("/predictions/predict ainda grava resposta placeholder. Integrar e validar o modelo é etapa posterior, não resultado deste TP2.", css["body"]),
         para("Entrega e referências", css["h1"]),
         para(
-            "Código, notebooks e relatórios: <link href='" + BRANCH_URL + "' color='#185b91'>branch feature/integracao-tp2-dados-seguranca</link>.<br/>"
+            "Código, notebooks e relatórios: <link href='" + REPO_URL + "' color='#185b91'>repositório na main</link>.<br/>"
             "Findings detalhados: <link href='" + REPORT_URL + "' color='#185b91'>relatório OWASP ZAP</link>.<br/>"
             "Exportação da ferramenta: <link href='" + ZAP_HTML_URL + "' color='#185b91'>relatório ZAP em HTML</link>.<br/>"
             "EDA estruturada: <link href='" + REPORT_URL.replace("relatorio_owasp_zap.md", "tp2_data_eda/relatorio.md") + "' color='#185b91'>relatório TP2 de dados</link>.",
@@ -338,7 +342,7 @@ def build() -> Path:
             css["body"],
         ),
         para(
-            "Este PDF resume a evidência versionada na branch. Os dados "
+            "Este PDF resume a evidência versionada no repositório. Os dados "
             "brutos não foram incorporados ao PDF ou ao Git por tamanho e "
             "licença; os scripts de download e verificação estão no repositório.",
             css["small"],

@@ -1,5 +1,7 @@
 # E-ComShield
 
+Projeto de Nathalia Calazans Artigas e Daniel Augusto da Silva.
+
 Projeto acadêmico de análise de feedback e classificação de intenções para
 e-commerce. A estratégia de dados separa explicitamente duas finalidades:
 
@@ -168,8 +170,9 @@ O PDF de entrega do TP2, com EDA, figuras, teste de hipótese e evidências de
 segurança, está em [`output/pdf/nathalia_artigas_PB_TP2.PDF`](output/pdf/nathalia_artigas_PB_TP2.PDF).
 Para regenerá-lo, instale `reportlab` e execute
 `python scripts/build_tp2_submission_pdf.py`; o script usa as figuras e os
-relatórios versionados. O envio ao professor deve incluir o PDF, o link desta
-branch e o relatório ZAP. A branch não foi integrada à `main`.
+relatórios versionados. O envio ao professor deve incluir o PDF, o link do
+repositório na `main` e o relatório ZAP. A branch de integração já foi
+incorporada à `main`.
 
 ## Ferramentas
  - Jupyter Notebook
