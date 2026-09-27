@@ -187,7 +187,7 @@ def build() -> Path:
             css["subtitle"],
         ),
         HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#3b77a4")),
-        para("Links de entrega (clique para abrir)", css["h2"]),
+        para("Recursos do projeto", css["h2"]),
         para(
             "<link href='" + REPO_URL + "' color='#185b91'>Repositório na main</link>"
             " &nbsp;|&nbsp; <link href='" + REPORT_URL + "' color='#185b91'>Relatório ZAP e triagem</link>"
@@ -206,7 +206,7 @@ def build() -> Path:
         ),
         para("Fontes e separação metodológica", css["h1"]),
         table([
-            ["Fonte", "Papel neste TP", "Volume após preparo"],
+            ["Fonte", "Papel na análise", "Volume após preparo"],
             ["Bitext Retail eCommerce", "EDA das intenções originais; base de treino do baseline", "44.884 textos; 46 intenções; 13 categorias"],
             ["B2W-Reviews01", "Feedback real em PT-BR; hipótese de comprimento do texto", "132.373 linhas originais; 131.347 após limpeza"],
             ["Amostra B2W anotada", "Validação externa futura, sem contaminar o treino", "500 rótulos humanos; 422 elegíveis sem marca de incerteza"],
@@ -222,13 +222,6 @@ def build() -> Path:
         bullet("Downloads fixados por revisão e SHA-256; scripts verificam a integridade antes da EDA.", css["body"]),
         bullet("Partições do Bitext determinísticas, estratificadas por intenção e sem texto idêntico entre treino e teste.", css["body"]),
         bullet("Notebooks 03 e 04 contêm a EDA executada; o relatório completo está em " + repo_link("reports/tp2_data_eda/relatorio.md", "reports/tp2_data_eda/relatorio.md") + ".", css["body"]),
-        para("Mapa da entrega", css["h2"]),
-        para(
-            "Este PDF reúne a síntese verificável dos critérios do TP2. "
-            "Os notebooks executáveis, o código, os testes e a exportação "
-            "integral do ZAP continuam como arquivos versionados, acessíveis "
-            "pelos links da última página.", css["small"],
-        ),
         PageBreak(),
     ]
 
@@ -350,12 +343,12 @@ def build() -> Path:
         para("Testes de segurança e evidência de execução", css["h1"]),
         para(
             "A suíte automatizada foi executada com <b>pytest tests/ -q</b>: "
-            "16 testes passaram. Os três cenários exigidos no enunciado "
-            "estão identificados abaixo; respostas 401/403/422 são "
+            "16 testes passaram. Os cenários centrais estão identificados "
+            "abaixo; respostas 401/403/422 são "
             "asserções dos testes, não inferências do scan ZAP.", css["body"],
         ),
         table([
-            ["Cenário obrigatório", "Requisição/asserção", "Resultado"],
+            ["Cenário de segurança", "Requisição/asserção", "Resultado"],
             ["Sem token", "GET /users/me e GET /refunds/ sem Authorization", "401"],
             ["Objeto de outro usuário", "Usuário A consulta /users/{id} e /refunds/{id} de B", "403"],
             ["Campo extra no corpo", "POST /auth/register com campo não declarado", "422"],
@@ -395,7 +388,7 @@ def build() -> Path:
         table([
             ["Severidade", "Tipos de alerta", "Tratamento"],
             ["Alta", "0", "Nenhum alerta desta severidade na varredura."],
-            ["Média", "1", "Alerta 10055 analisado abaixo; risco aceito no TP2 local."],
+            ["Média", "1", "Alerta 10055 analisado abaixo; risco aceito no ambiente local."],
             ["Baixa", "2", "Alertas de metadados em bundles estáticos; contexto registrado no relatório."],
             ["Informativa", "3", "Observações documentadas na exportação integral."],
         ], [34 * mm, 31 * mm, 108 * mm], css),
@@ -429,7 +422,7 @@ def build() -> Path:
         PageBreak(),
     ]
 
-    # Page 8 - interpretation, caveats and submission links.
+    # Pages 8-9 - interpretation, caveats and references.
     content += [
         para("Síntese da EDA e continuidade", css["h1"]),
         para("Insights principais", css["h2"]),
@@ -452,7 +445,7 @@ def build() -> Path:
             css["body"],
         ),
         PageBreak(),
-        para("Entrega e referências", css["h1"]),
+        para("Referências e materiais suplementares", css["h1"]),
         para(
             "Código, notebooks e relatórios: <link href='" + REPO_URL + "' color='#185b91'>repositório na main</link>.<br/>"
             "Findings detalhados: <link href='" + REPORT_URL + "' color='#185b91'>relatório OWASP ZAP</link>.<br/>"
@@ -460,7 +453,7 @@ def build() -> Path:
             "EDA estruturada: <link href='" + EDA_URL + "' color='#185b91'>relatório TP2 de dados</link>.",
             css["body"],
         ),
-        para("Arquivos centrais da entrega", css["h2"]),
+        para("Arquivos de análise e verificação", css["h2"]),
         table([
             ["Item", "Arquivo versionado"],
             ["EDA B2W", repo_link("notebooks/03_b2w_feedback_eda.ipynb", "notebooks/03_b2w_feedback_eda.ipynb")],
@@ -470,9 +463,6 @@ def build() -> Path:
             ["Relatório EDA", repo_link("reports/tp2_data_eda/relatorio.md", "reports/tp2_data_eda/relatorio.md")],
             ["ZAP original", "<link href='" + ZAP_HTML_URL + "' color='#185b91'>reports/zap_report.html</link> e <link href='" + ZAP_JSON_URL + "' color='#185b91'>JSON</link>"],
         ], [40 * mm, 133 * mm], css),
-        para("Checklist de envio", css["h2"]),
-        bullet("Anexar este PDF no campo próprio do TP2, mantendo o nome solicitado pela disciplina.", css["body"]),
-        bullet("Informar o link do repositório e o link do relatório ZAP; ambos também estão clicáveis acima.", css["body"]),
         para(
             "Fontes dos dados: "
             "<link href='https://github.com/americanas-tech/b2w-reviews01' color='#185b91'>B2W-Reviews01 (CC BY-NC-SA 4.0)</link>; "
@@ -480,10 +470,8 @@ def build() -> Path:
             css["body"],
         ),
         para(
-            "O relatório de dados no repositório usa as seções Problema, "
-            "Dados, Análise, Insights principais, Limitações e Próximos "
-            "passos. Os dados brutos não foram incorporados ao PDF ou ao Git "
-            "por tamanho e licença; scripts de download e verificação "
+            "Os dados brutos não integram o repositório devido ao tamanho "
+            "e às condições de uso. Os scripts de download e verificação "
             "permitem reproduzir a análise.",
             css["small"],
         ),
