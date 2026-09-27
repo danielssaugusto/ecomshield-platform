@@ -1,17 +1,9 @@
-<<<<<<< HEAD
 from fastapi import APIRouter, Depends, HTTPException, status
-=======
-from fastapi import APIRouter, Depends
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 from sqlmodel import Session, select
 
 from src.app.auth import get_current_user
 from src.app.database import get_session
-<<<<<<< HEAD
 from src.app.models import Prediction, PredictionRead, User, UserRole
-=======
-from src.app.models import Prediction, PredictionRead, User
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 router = APIRouter(prefix="/predictions", tags=["Predição"])
 
@@ -47,7 +39,6 @@ def list_predictions(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-<<<<<<< HEAD
     if current_user.role == UserRole.admin:
         query = select(Prediction)
     else:
@@ -80,12 +71,3 @@ def get_prediction(
         )
 
     return prediction
-=======
-    predictions = session.exec(
-        select(Prediction)
-        .where(Prediction.user_id == current_user.id)
-        .offset(skip)
-        .limit(limit)
-    ).all()
-    return predictions
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87

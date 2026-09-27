@@ -3,12 +3,16 @@
 from sqlmodel import Session, select
 
 from src.app.auth import get_password_hash
+from src.app.config import settings
 from src.app.database import engine
 from src.app.models import User, UserRole
 
 
 def seed_admin() -> None:
     """Create the admin user if it does not exist yet."""
+    if not settings.ADMIN_BOOTSTRAP_PASSWORD:
+        return
+
     with Session(engine) as session:
         existing = session.exec(
             select(User).where(User.username == "admin")
@@ -20,7 +24,7 @@ def seed_admin() -> None:
         admin = User(
             username="admin",
             email="admin@ecomshield.dev",
-            hashed_password=get_password_hash("senha123"),
+            hashed_password=get_password_hash(settings.ADMIN_BOOTSTRAP_PASSWORD),
             role=UserRole.admin,
             disabled=False,
         )

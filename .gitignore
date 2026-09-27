@@ -210,6 +210,18 @@ data/processed/b2w_reviews_intents.parquet
 data/processed/b2w_reviews_intents_report.json
 data/processed/b2w_manual_review_sample.csv
 reports/b2w_intents/
+ecomshield.db
+data/raw/bitext-retail-ecommerce/
+data/processed/bitext_retail_intents.parquet
+data/processed/bitext_retail_intents_report.json
+data/processed/b2w_feedback_eda_report.json
+data/processed/bitext_intent_evaluation.json
+data/processed/ptbr_intent_validation_final.csv
+data/annotations/ptbr_intent_validation_queue.csv
+data/annotations/ptbr_intent_validation_queue_metadata.json
+data/annotations/annotator_*.csv
+data/annotations/ptbr_intent_adjudication.csv
+models/*.joblib
 
 # Ruff stuff:
 .ruff_cache/

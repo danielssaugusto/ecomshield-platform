@@ -2,7 +2,7 @@
 name = "ecomshield"
 version = "0.1.0"
 description = "Secure e-commerce refund and risk management platform"
-requires-python = ">=3.14.4"
+requires-python = ">=3.11"
 
 dependencies = [
     "fastapi",
@@ -15,11 +15,13 @@ dependencies = [
     "sqlmodel",
     "psycopg2-binary",
     "pandas",
+    "certifi",
     "pyarrow",
     "numpy",
     "matplotlib",
     "seaborn",
-    "jupyter"
+    "jupyter",
+    "scikit-learn"
 ]
 
 [project.optional-dependencies]
@@ -28,7 +30,6 @@ dev = [
     "httpx",
     "ruff"
 ]
-
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

@@ -1,3 +1,6 @@
+from secrets import token_urlsafe
+
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -8,11 +11,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://ecomshield:ecomshield_dev@localhost:5432/ecomshield"
 
     # JWT / Auth
-    SECRET_KEY: str = "chave_dev_temporaria_altere_no_arquivo_env"
+    SECRET_KEY: str = Field(default_factory=lambda: token_urlsafe(48))
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ADMIN_BOOTSTRAP_PASSWORD: str | None = None
 
-<<<<<<< HEAD
     # CORS
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
@@ -20,8 +23,6 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
-=======
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

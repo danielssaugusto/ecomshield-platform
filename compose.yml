@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: ecomshield
       POSTGRES_PASSWORD: ecomshield_dev
       POSTGRES_DB: ecomshield
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

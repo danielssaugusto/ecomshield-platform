@@ -6,6 +6,9 @@ Este documento contém o diagrama de fluxo de dados (DFD) e a análise da Tríad
 
 O diagrama abaixo mapeia o fluxo de autenticação e predição, indicando claramente as fronteiras de confiança (Trust Boundaries) e os componentes do sistema.
 
+O endpoint de predição ainda grava um resultado *placeholder*; o baseline
+Bitext documentado na parte de dados não está conectado à API neste TP.
+
 ```mermaid
 flowchart TD
     subgraph Client ["Fronteira de Confiança do Cliente / Usuário"]
@@ -57,7 +60,7 @@ A análise da Tríade CIA (Confidencialidade, Integridade, Disponibilidade) foi 
 
 ### 2. Módulo de Autenticação / Banco de Dados de Usuários
 - **Confidencialidade:** O banco de dados PostgreSQL não armazena as senhas em texto claro. É utilizado o `passlib` com o algoritmo `bcrypt` para gerar e armazenar apenas hashes irreversíveis. As credenciais de conexão ao banco são gerenciadas via variáveis de ambiente (`.env`).
-- **Integridade:** Os tokens JWT são assinados digitalmente usando um `SECRET_KEY` forte (HS256). Qualquer tentativa de adulteração de privilégios ou identidade pelo cliente invalidará a integridade do token. O SQLModel/SQLAlchemy previne SQL Injection por padrão através de queries parametrizadas.
+- **Integridade:** Os tokens JWT são assinados digitalmente usando `SECRET_KEY` (HS256); em uma implantação persistente, a chave deve ser aleatória, secreta e configurada no ambiente. A assinatura impede adulteração sem essa chave. As consultas ORM utilizam parâmetros em vez de concatenar entrada diretamente em SQL.
 - **Disponibilidade:** O PostgreSQL roda em container Docker com volume persistente e healthcheck, garantindo que o serviço esteja sempre acessível. Em produção, pode ser replicado para alta disponibilidade.
 
 ### 3. Componente Cliente / Gerenciamento de Token
@@ -67,5 +70,5 @@ A análise da Tríade CIA (Confidencialidade, Integridade, Disponibilidade) foi 
 
 ### 4. Banco de Dados PostgreSQL
 - **Confidencialidade:** O acesso ao banco é restrito por credenciais configuradas via variáveis de ambiente. A porta 5432 só é exposta ao container da API via rede interna do Docker Compose.
-- **Integridade:** Os dados persistidos utilizam constraints (UNIQUE, FOREIGN KEY, CHECK) definidos pelo SQLModel para garantir consistência referencial entre Users, Reviews, Predictions e RefundRequests.
+- **Integridade:** Os modelos definem chaves únicas e estrangeiras. A validação de intervalos numéricos está nos schemas da API e não substitui constraints `CHECK` no banco.
 - **Disponibilidade:** Os dados são persistidos em volume Docker nomeado (`pgdata`), garantindo que sobrevivam a reinicializações dos containers.

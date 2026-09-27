@@ -90,7 +90,7 @@ def get_current_user(
         select(User).where(User.username == token_data.username)
     ).first()
 
-    if user is None:
+    if user is None or user.disabled:
         raise credentials_exception
 
     return user

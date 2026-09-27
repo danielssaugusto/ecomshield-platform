@@ -1,11 +1,7 @@
 from contextlib import asynccontextmanager
 
-<<<<<<< HEAD
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-=======
-from fastapi import FastAPI
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 from src.app.config import settings
 from src.app.database import create_db_and_tables
@@ -31,7 +27,6 @@ app = FastAPI(
 )
 
 
-<<<<<<< HEAD
 # ── Middleware: HTTP Security Headers ─────────────────────
 
 @app.middleware("http")
@@ -56,8 +51,6 @@ app.add_middleware(
 )
 
 
-=======
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 # ── Routers ───────────────────────────────────────────────
 
 app.include_router(auth.router)

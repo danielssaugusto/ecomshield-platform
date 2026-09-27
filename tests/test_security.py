@@ -1,11 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 from sqlmodel.pool import StaticPool
 
 from src.app.auth import create_access_token, get_password_hash
 from src.app.database import get_session
-from src.app.models import User, UserRole, RefundRequest, Review
+from src.app.models import RefundRequest, User, UserRole
 from src.app.rate_limiter import auth_rate_limiter
 from src.main import app
 
@@ -106,6 +106,33 @@ def test_extra_fields_in_request_body_rejected(client: TestClient):
     assert response.status_code == 422
     errors = response.json()["detail"]
     assert any(err.get("type") == "extra_forbidden" for err in errors)
+
+
+def test_registration_cannot_assign_admin_role(client: TestClient, session: Session):
+    payload = {
+        "username": "attacker",
+        "email": "attacker@example.com",
+        "password": "strongpassword123",
+        "role": "admin",
+    }
+    response = client.post("/auth/register", json=payload)
+    assert response.status_code == 422
+    assert session.exec(select(User).where(User.username == "attacker")).first() is None
+
+
+def test_disabled_user_cannot_login_or_reuse_token(client: TestClient, session: Session):
+    user = create_test_user(session, "disabled", "disabled@example.com")
+    token = get_auth_header(user.username)
+    user.disabled = True
+    session.add(user)
+    session.commit()
+
+    login = client.post(
+        "/auth/token",
+        data={"username": user.username, "password": "password123"},
+    )
+    assert login.status_code == 401
+    assert client.get("/users/me", headers=token).status_code == 401
 
 
 # ── Additional Security Verification Tests ────────────────────────────────────

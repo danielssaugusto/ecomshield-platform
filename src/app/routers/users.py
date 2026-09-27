@@ -3,11 +3,7 @@ from sqlmodel import Session, select
 
 from src.app.auth import get_current_user
 from src.app.database import get_session
-<<<<<<< HEAD
 from src.app.models import User, UserRead, UserRole
-=======
-from src.app.models import User, UserRead
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
 
 router = APIRouter(prefix="/users", tags=["Usuários"])
 
@@ -26,18 +22,12 @@ def list_users(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-<<<<<<< HEAD
     if current_user.role == UserRole.admin:
         users = session.exec(
             select(User).offset(skip).limit(limit)
         ).all()
     else:
         users = [current_user]
-=======
-    users = session.exec(
-        select(User).offset(skip).limit(limit)
-    ).all()
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     return users
 
 
@@ -47,15 +37,12 @@ def get_user(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-<<<<<<< HEAD
     if current_user.role != UserRole.admin and current_user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Sem permissão para acessar os dados deste usuário",
         )
 
-=======
->>>>>>> b6eb3ce935a1d7d0e6a23984cb49ca4a7766ae87
     user = session.get(User, user_id)
 
     if not user:
