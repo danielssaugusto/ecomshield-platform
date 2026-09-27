@@ -1,25 +1,67 @@
-# TP2 — verificação passiva com OWASP ZAP
+# TP2 — verificação com OWASP ZAP
 
-## Estado da evidência
+## Execução e escopo
 
-**Pendente de execução real.** Os antigos `zap_report.html` e
-`zap_report.json` foram removidos porque eram produzidos por um simulador com
-alertas escritos no código, e não exportados pelo OWASP ZAP. Eles não eram
-evidência válida de scan. Nenhum resultado ou risco abaixo é atribuído ao ZAP
-antes de rodar a ferramenta.
+Em **26/09/2026, 22h37 (America/Sao_Paulo)**, executamos o **OWASP ZAP
+2.17.0** portátil contra a API local em `http://127.0.0.1:8000`, usando
+**PostgreSQL 16.15 em um banco descartável**. O ZAP foi obtido da distribuição
+oficial; o SHA-256 do arquivo `ZAP_2.17.0_Crossplatform.zip` foi
+`94c8f767b1c2e94f0db66b3ae56514d5e3f5a728ee1b6c798e0c8fe2d61fbff0`.
 
-## Procedimento reprodutível
+Comando usado, apontando para o diretório temporário da distribuição:
 
-1. Inicie a API localmente com banco configurado e confirme
-   `http://localhost:8000/health` e `http://localhost:8000/openapi.json`.
-2. Com Docker disponível, execute
-   `python scripts/run_owasp_zap_scan.py`. O script roda a imagem oficial
-   `ghcr.io/zaproxy/zaproxy:stable` com `zap-baseline.py` e exporta
-   `reports/zap_report.html` e `reports/zap_report.json` diretamente do ZAP.
-3. Registre aqui a data, versão da imagem, URL, quantidade de URLs observadas,
-   alertas reais, severidades, triagem (corrigido/aceito/pendente) e links para
-   os dois relatórios exportados. Um scan passivo sem autenticação **não**
-   demonstra ausência de BOLA/IDOR nas rotas protegidas; use os testes de
-   autorização como evidência separada.
+```bash
+python scripts/run_owasp_zap_scan.py \
+  --zap-home /caminho/ZAP_2.17.0 \
+  --target http://127.0.0.1:8000 \
+  --import-openapi
+```
 
-Referência do procedimento: [ZAP Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/).
+A automação solicitou oito recursos diretamente (saúde, OpenAPI, Swagger,
+ReDoc, três assets locais e uma rota protegida, cuja resposta esperada era
+401), importou **17 URLs** da especificação OpenAPI e aguardou a análise
+**passiva**. A importação pode enviar requisições POST; só use
+`--import-openapi` com banco descartável. Sem essa opção, o modo portátil faz
+somente as requisições explícitas de leitura. O modo Docker padrão continua
+disponível com `python scripts/run_owasp_zap_scan.py`.
+
+Evidências exportadas diretamente pelo ZAP: [HTML](zap_report.html),
+[JSON](zap_report.json) e [log da execução](zap_scan.log). A execução terminou
+com código **0** e `Automation plan succeeded!`. Os relatórios antigos,
+gerados por um simulador, foram substituídos e não são usados como evidência.
+
+## Resultado e triagem
+
+| Risco ZAP | Regra / ocorrências | Triagem |
+| --- | --- | --- |
+| Alto | Nenhuma | — |
+| Médio | `10055` CSP `style-src unsafe-inline` / 1 | **Pendente/aceito provisoriamente** na página `/docs`. A UI injeta estilos; remover a exceção sem testar a interface pode quebrar a documentação. Restrito à página de documentação; `script-src` usa origem própria e hash do script inline. Revisar a UI/CSP antes de expor a documentação publicamente. |
+| Baixo | `2` Private IP Disclosure / 1 | **Falso positivo contextual**: `192.168.0.1` está no bundle estático do ReDoc; não é endereço revelado pelo backend. |
+| Baixo | `10096` Timestamp Disclosure / 5 | **Falso positivo contextual**: constantes embutidas no bundle estático do Swagger UI, não timestamps de usuários ou transações. |
+| Informativo | `10111` Authentication Request Identified / 1 | `/auth/token` identificado corretamente; não é vulnerabilidade. |
+| Informativo | `10027` Suspicious Comments / 2 | Correspondências em bundles estáticos de terceiros; sem segredo ou comentário próprio identificado nessa evidência. |
+| Informativo | `10109` Modern Web Application / 2 | Classificação de Swagger e ReDoc; não é vulnerabilidade. |
+
+Antes da correção, a documentação carregava bibliotecas por CDN e gerava
+alertas de dependência externa/SRI. Swagger UI e ReDoc agora são servidos
+localmente com versões e hashes documentados em
+[`src/app/static/THIRD_PARTY.md`](../src/app/static/THIRD_PARTY.md). Isso
+eliminou aqueles alertas, mas **não** o aviso médio de `unsafe-inline`.
+
+## Autorização e limites da evidência
+
+O ZAP fez análise passiva **sem sessão autenticada**. Logo, não prova ausência
+de IDOR/BOLA, SQL injection explorável ou falhas nas regras de negócio. A
+autorização por objeto tem evidência separada: os testes em
+`tests/test_security.py` e `tests/test_api.py` passaram; no smoke test real
+com PostgreSQL, a avaliação criada pelo usuário B retornou **403** ao usuário
+A, **200** a B e **401** sem token. A avaliação continuou disponível a B após
+reiniciar a API, confirmando persistência no PostgreSQL.
+
+O ZAP registrou `No check for updates for over 3 month`, então os add-ons
+podem estar desatualizados. Para uma avaliação de segurança mais completa,
+seriam necessários um scan autenticado, testes ativos controlados em ambiente
+descartável e revisão manual; estes **não** foram realizados aqui.
+
+Referências: [ZAP Automation Framework](https://www.zaproxy.org/docs/desktop/addons/automation-framework/),
+[ZAP Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/).

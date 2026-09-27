@@ -1,3 +1,7 @@
+import base64
+import hashlib
+import re
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine, select
@@ -5,7 +9,7 @@ from sqlmodel.pool import StaticPool
 
 from src.app.auth import create_access_token, get_password_hash
 from src.app.database import get_session
-from src.app.models import RefundRequest, User, UserRole
+from src.app.models import Prediction, RefundRequest, Review, User, UserRole
 from src.app.rate_limiter import auth_rate_limiter
 from src.main import app
 
@@ -93,6 +97,44 @@ def test_bola_access_other_user_resource_forbidden(client: TestClient, session: 
     assert "Sem permissão" in resp_refund.json()["detail"]
 
 
+def test_review_and_prediction_are_private(client: TestClient, session: Session):
+    user_a = create_test_user(session, "privatea", "privatea@example.com")
+    user_b = create_test_user(session, "privateb", "privateb@example.com")
+    review_b = Review(
+        user_id=user_b.id,
+        product_name="Produto",
+        review_text="Texto de teste",
+        overall_rating=3,
+    )
+    prediction_b = Prediction(
+        user_id=user_b.id,
+        input_data="{}",
+        result="placeholder",
+    )
+    session.add(review_b)
+    session.add(prediction_b)
+    session.commit()
+    session.refresh(review_b)
+    session.refresh(prediction_b)
+
+    headers_a = get_auth_header(user_a.username)
+    assert client.get(f"/reviews/{review_b.id}", headers=headers_a).status_code == 403
+    assert client.get(f"/predictions/{prediction_b.id}", headers=headers_a).status_code == 403
+    assert client.get("/reviews/", headers=headers_a).json() == []
+    assert client.get("/predictions/", headers=headers_a).json() == []
+
+
+def test_public_registration_creates_viewer(client: TestClient):
+    payload = {
+        "username": "ordinary",
+        "email": "ordinary@example.com",
+        "password": "strongpassword123",
+    }
+    response = client.post("/auth/register", json=payload)
+    assert response.status_code == 201
+    assert response.json()["role"] == "viewer"
+
+
 # ── (c) Envio de campo extra no body da request (Pydantic extra='forbid') ──────
 
 def test_extra_fields_in_request_body_rejected(client: TestClient):
@@ -159,5 +201,27 @@ def test_security_headers_and_cors_middleware(client: TestClient):
     assert response.headers["X-Frame-Options"] == "DENY"
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert response.headers["X-XSS-Protection"] == "1; mode=block"
-    assert response.headers["Content-Security-Policy"] == "default-src 'self'; frame-ancestors 'none';"
+    assert "form-action 'self'" in response.headers["Content-Security-Policy"]
+    assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]
     assert response.headers["Access-Control-Allow-Origin"] == "http://localhost:3000"
+
+
+def test_docs_use_local_assets_and_specific_csp(client: TestClient):
+    response = client.get("/docs")
+    assert response.status_code == 200
+    assert "/static/swagger-ui-bundle.js" in response.text
+    assert "/static/swagger-ui.css" in response.text
+    assert "cdn.jsdelivr.net" not in response.text
+    assert "sha256-" in response.headers["Content-Security-Policy"]
+    inline_script = re.search(rb"<script>(.*?)</script>", response.content, re.DOTALL)
+    assert inline_script is not None
+    digest = base64.b64encode(hashlib.sha256(inline_script.group(1)).digest()).decode()
+    assert f"'sha256-{digest}'" in response.headers["Content-Security-Policy"]
+    assert client.get("/static/swagger-ui-bundle.js").status_code == 200
+    assert client.get("/static/swagger-ui.css").status_code == 200
+
+    redoc = client.get("/redoc")
+    assert redoc.status_code == 200
+    assert "/static/redoc.standalone.js" in redoc.text
+    assert "cdn." not in redoc.text
+    assert client.get("/static/redoc.standalone.js").status_code == 200

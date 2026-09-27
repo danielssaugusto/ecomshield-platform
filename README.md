@@ -144,9 +144,13 @@ Execute `python -m pytest tests/test_api.py tests/test_security.py -q` para
 verificar autenticação, autorização por objeto, validação de payloads e
 controles básicos. O relatório de EDA canônico é
 [`reports/tp2_data_eda/relatorio.md`](reports/tp2_data_eda/relatorio.md).
-O scan passivo do OWASP ZAP precisa ser executado contra a API local;
-resultados simulados não são aceitos como relatório da ferramenta. Consulte
+O scan passivo real do OWASP ZAP foi executado contra a API local com banco
+PostgreSQL descartável. Os relatórios exportados e a triagem, incluindo um
+alerta médio ainda pendente na documentação, estão em
 [`reports/relatorio_owasp_zap.md`](reports/relatorio_owasp_zap.md).
+O script `scripts/run_owasp_zap_scan.py` permite reproduzir o scan com Docker
+ou com uma distribuição portátil do ZAP; a opção `--import-openapi` pode
+enviar requisições de escrita e exige um banco de teste.
 
 ## Ferramentas
  - Jupyter Notebook
