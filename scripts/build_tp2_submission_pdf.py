@@ -187,6 +187,14 @@ def build() -> Path:
             css["subtitle"],
         ),
         HRFlowable(width="100%", thickness=1.2, color=colors.HexColor("#3b77a4")),
+        para("Links de entrega (clique para abrir)", css["h2"]),
+        para(
+            "<link href='" + REPO_URL + "' color='#185b91'>Repositório na main</link>"
+            " &nbsp;|&nbsp; <link href='" + REPORT_URL + "' color='#185b91'>Relatório ZAP e triagem</link>"
+            " &nbsp;|&nbsp; <link href='" + ZAP_HTML_URL + "' color='#185b91'>Exportação ZAP (HTML)</link>"
+            "<br/><link href='" + EDA_URL + "' color='#185b91'>Relatório completo da EDA</link>",
+            css["body"],
+        ),
         para("Problema e objetivo", css["h1"]),
         para(
             "Aprofundar a análise de textos de e-commerce com correlação, "
