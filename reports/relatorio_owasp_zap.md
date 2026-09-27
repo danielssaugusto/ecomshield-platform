@@ -35,7 +35,7 @@ gerados por um simulador, foram substituídos e não são usados como evidência
 | Risco ZAP | Regra / ocorrências | Triagem |
 | --- | --- | --- |
 | Alto | Nenhuma | — |
-| Médio | `10055` CSP `style-src unsafe-inline` / 1 | **Pendente/aceito provisoriamente** na página `/docs`. A UI injeta estilos; remover a exceção sem testar a interface pode quebrar a documentação. Restrito à página de documentação; `script-src` usa origem própria e hash do script inline. Revisar a UI/CSP antes de expor a documentação publicamente. |
+| Médio | `10055` CSP `style-src unsafe-inline` / 1 | **Risco aceito para o TP2 local**, não corrigido. A exceção permite CSS inline na página `/docs`; se houver injeção de conteúdo nessa página, CSS malicioso pode ser aplicado. O bundle do Swagger UI contém operações de estilo dinâmico; a compatibilidade após retirar a exceção não foi verificada em navegador. O escopo é somente a documentação: scripts são limitados à origem própria e ao hash do script inline; a API não usa essa exceção nas demais respostas. Antes de expor `/docs` publicamente, testar uma UI com CSP estrita ou restringir o acesso à documentação. |
 | Baixo | `2` Private IP Disclosure / 1 | **Falso positivo contextual**: `192.168.0.1` está no bundle estático do ReDoc; não é endereço revelado pelo backend. |
 | Baixo | `10096` Timestamp Disclosure / 5 | **Falso positivo contextual**: constantes embutidas no bundle estático do Swagger UI, não timestamps de usuários ou transações. |
 | Informativo | `10111` Authentication Request Identified / 1 | `/auth/token` identificado corretamente; não é vulnerabilidade. |
@@ -47,6 +47,9 @@ alertas de dependência externa/SRI. Swagger UI e ReDoc agora são servidos
 localmente com versões e hashes documentados em
 [`src/app/static/THIRD_PARTY.md`](../src/app/static/THIRD_PARTY.md). Isso
 eliminou aqueles alertas, mas **não** o aviso médio de `unsafe-inline`.
+O status **aceito** acima é uma decisão de risco para o ambiente local de
+entrega, não uma afirmação de que o alerta seja falso positivo ou de que a
+documentação seja segura para exposição pública irrestrita.
 
 ## Autorização e limites da evidência
 

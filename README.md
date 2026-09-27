@@ -144,13 +144,32 @@ Execute `python -m pytest tests/test_api.py tests/test_security.py -q` para
 verificar autenticação, autorização por objeto, validação de payloads e
 controles básicos. O relatório de EDA canônico é
 [`reports/tp2_data_eda/relatorio.md`](reports/tp2_data_eda/relatorio.md).
+
+O endpoint `POST /auth/token` permite **5 tentativas por endereço IP em uma
+janela móvel de 60 segundos** e devolve HTTP 429 com `Retry-After` quando o
+limite é excedido. Esse limite reduz tentativas automatizadas rápidas sem
+prejudicar um pequeno número de erros de digitação legítimos; foi escolhido
+para a demonstração local do TP2, não como parâmetro universal de produção.
+O contador atual fica na memória de um processo: reinícios o zeram, múltiplos
+workers não compartilham estado e usuários atrás do mesmo NAT dividem a cota.
+Em implantação pública, seria necessário um armazenamento compartilhado
+(por exemplo, Redis), configuração consciente de proxy/IP e monitoramento
+antes de tratar o controle como proteção robusta contra força bruta.
+
 O scan passivo real do OWASP ZAP foi executado contra a API local com banco
 PostgreSQL descartável. Os relatórios exportados e a triagem, incluindo um
-alerta médio ainda pendente na documentação, estão em
+alerta médio aceito com restrições na documentação, estão em
 [`reports/relatorio_owasp_zap.md`](reports/relatorio_owasp_zap.md).
 O script `scripts/run_owasp_zap_scan.py` permite reproduzir o scan com Docker
 ou com uma distribuição portátil do ZAP; a opção `--import-openapi` pode
 enviar requisições de escrita e exige um banco de teste.
+
+O PDF de entrega do TP2, com EDA, figuras, teste de hipótese e evidências de
+segurança, está em [`output/pdf/nathalia_artigas_PB_TP2.PDF`](output/pdf/nathalia_artigas_PB_TP2.PDF).
+Para regenerá-lo, instale `reportlab` e execute
+`python scripts/build_tp2_submission_pdf.py`; o script usa as figuras e os
+relatórios versionados. O envio ao professor deve incluir o PDF, o link desta
+branch e o relatório ZAP. A branch não foi integrada à `main`.
 
 ## Ferramentas
  - Jupyter Notebook
