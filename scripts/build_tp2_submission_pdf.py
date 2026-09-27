@@ -33,6 +33,13 @@ REPORT_URL = (
     "main/reports/relatorio_owasp_zap.md"
 )
 ZAP_HTML_URL = REPORT_URL.replace("relatorio_owasp_zap.md", "zap_report.html")
+ZAP_JSON_URL = REPORT_URL.replace("relatorio_owasp_zap.md", "zap_report.json")
+EDA_URL = REPORT_URL.replace("relatorio_owasp_zap.md", "tp2_data_eda/relatorio.md")
+REPO_BLOB_URL = "https://github.com/danielssaugusto/ecomshield-platform/blob/main/"
+
+
+def repo_link(path: str, label: str) -> str:
+    return f"<link href='{REPO_BLOB_URL}{path}' color='#185b91'>{label}</link>"
 
 
 def register_fonts() -> None:
@@ -206,7 +213,14 @@ def build() -> Path:
         para("Reprodutibilidade", css["h1"]),
         bullet("Downloads fixados por revisão e SHA-256; scripts verificam a integridade antes da EDA.", css["body"]),
         bullet("Partições do Bitext determinísticas, estratificadas por intenção e sem texto idêntico entre treino e teste.", css["body"]),
-        bullet("Notebooks 03 e 04 contêm a EDA executada; o relatório completo está em <link href='" + REPORT_URL.replace("relatorio_owasp_zap.md", "tp2_data_eda/relatorio.md") + "' color='#185b91'>reports/tp2_data_eda/relatorio.md</link>.", css["body"]),
+        bullet("Notebooks 03 e 04 contêm a EDA executada; o relatório completo está em " + repo_link("reports/tp2_data_eda/relatorio.md", "reports/tp2_data_eda/relatorio.md") + ".", css["body"]),
+        para("Mapa da entrega", css["h2"]),
+        para(
+            "Este PDF reúne a síntese verificável dos critérios do TP2. "
+            "Os notebooks executáveis, o código, os testes e a exportação "
+            "integral do ZAP continuam como arquivos versionados, acessíveis "
+            "pelos links da última página.", css["small"],
+        ),
         PageBreak(),
     ]
 
@@ -287,10 +301,29 @@ def build() -> Path:
         table([
             ["Controle", "Implementação e evidência"],
             ["Validação", "Modelos de entrada Pydantic com extra='forbid'; campos inesperados retornam 422."],
-            ["Persistência e BOLA", "SQLModel com PostgreSQL; recursos vinculados ao usuário; leitura por ID exige dono ou administrador."],
+            ["Persistência e BOLA", "SQLModel com PostgreSQL e consultas ORM parametrizadas, sem SQL bruto; leituras por ID em usuários, avaliações, reembolsos e predições exigem dono ou administrador."],
             ["Headers e CORS", "HSTS, X-Frame-Options, X-Content-Type-Options e CSP; origens CORS em allowlist explícita."],
             ["Brute force", "POST /auth/token: 5 tentativas por IP em janela móvel de 60 segundos; resposta 429 com Retry-After."],
         ], [45 * mm, 128 * mm], css),
+        para("Autorização por objeto e identidade", css["h2"]),
+        para(
+            "As rotas de detalhe com identificador não aceitam apenas um "
+            "token válido: comparam o usuário autenticado com o dono do "
+            "registro (ou exigem perfil administrador). As listagens também "
+            "são filtradas por escopo. O cadastro público cria somente "
+            "usuários viewer; tentativa de enviar role extra é rejeitada "
+            "com 422. Usuários desativados não obtêm nem reutilizam token.",
+            css["body"],
+        ),
+        para("Headers e acesso entre origens", css["h2"]),
+        para(
+            "O middleware emite HSTS, X-Frame-Options, "
+            "X-Content-Type-Options e Content-Security-Policy. O CORS não "
+            "usa curinga: responde às origens autorizadas na configuração. "
+            "HSTS é relevante quando o serviço é publicado atrás de HTTPS; "
+            "o teste local em HTTP verifica o cabeçalho, não uma conexão TLS.",
+            css["body"],
+        ),
         para("Justificativa e limite do rate limiting", css["h2"]),
         para(
             "Cinco tentativas por minuto reduzem rajadas de tentativa de "
@@ -301,40 +334,137 @@ def build() -> Path:
             "exige armazenamento compartilhado, tratamento de proxy/IP e "
             "monitoramento.", css["body"],
         ),
-        para("Verificações executadas", css["h2"]),
-        bullet("pytest tests/: 16 testes passaram, cobrindo ausência de token, BOLA, campo extra, cadastro sem privilégio, CORS, headers e limite de autenticação.", css["body"]),
-        bullet("Smoke test com PostgreSQL 16.15: recurso de B retornou 403 para A, 200 para B e 401 sem token; continuou acessível após reinício da API.", css["body"]),
-        bullet("OWASP ZAP 2.17.0 real, análise passiva sem autenticação: 17 URLs importadas; relatório HTML/JSON exportado com execução concluída.", css["body"]),
-        para("Finding Medium do ZAP", css["h2"]),
+        PageBreak(),
+    ]
+
+    # Page 6 - test evidence.
+    content += [
+        para("Testes de segurança e evidência de execução", css["h1"]),
         para(
-            "CSP style-src 'unsafe-inline' em /docs: <b>risco aceito para "
-            "o TP2 local, não corrigido</b>. A exceção permite estilos "
-            "inline na interface Swagger; removê-la sem validar "
-            "compatibilidade pode quebrar a documentação. Scripts são "
-            "restringidos à origem própria e a hash específico, e a "
-            "exceção não vale para as demais respostas. Antes de exposição "
-            "pública, restringir /docs ou validar uma interface com CSP "
-            "mais estrita. Não houve finding High.", css["body"],
+            "A suíte automatizada foi executada com <b>pytest tests/ -q</b>: "
+            "16 testes passaram. Os três cenários exigidos no enunciado "
+            "estão identificados abaixo; respostas 401/403/422 são "
+            "asserções dos testes, não inferências do scan ZAP.", css["body"],
+        ),
+        table([
+            ["Cenário obrigatório", "Requisição/asserção", "Resultado"],
+            ["Sem token", "GET /users/me e GET /refunds/ sem Authorization", "401"],
+            ["Objeto de outro usuário", "Usuário A consulta /users/{id} e /refunds/{id} de B", "403"],
+            ["Campo extra no corpo", "POST /auth/register com campo não declarado", "422"],
+        ], [44 * mm, 104 * mm, 25 * mm], css),
+        Spacer(1, 9),
+        para("Cobertura complementar", css["h2"]),
+        bullet("Leitura privada de avaliações e predições também retorna 403 ao usuário errado.", css["body"]),
+        bullet("Cadastro público não permite atribuir perfil admin; contas desativadas não fazem login nem reutilizam token.", css["body"]),
+        bullet("A sexta tentativa de autenticação na janela retorna 429; o teste verifica Retry-After.", css["body"]),
+        bullet("Headers, allowlist CORS e recursos estáticos locais da documentação têm verificações próprias.", css["body"]),
+        para("Teste manual com banco persistente", css["h2"]),
+        para(
+            "Em PostgreSQL 16.15, um recurso criado por B retornou 403 "
+            "para A, 200 para B e 401 sem token. Após reiniciar a API, "
+            "o registro continuou acessível para B. Esse smoke test "
+            "complementa os testes automatizados; não equivale a uma "
+            "auditoria completa de todas as rotas e perfis.", css["body"],
+        ),
+        para(
+            "Código da suíte: " + repo_link("tests/test_security.py", "tests/test_security.py") +
+            " e " + repo_link("tests/test_api.py", "tests/test_api.py") + ".",
+            css["small"],
         ),
         PageBreak(),
     ]
 
-    # Page 6 - limitations, handoff and references.
+    # Page 7 - actual passive scan and risk triage.
     content += [
-        para("Limitações e próximos passos", css["h1"]),
+        para("OWASP ZAP: scan passivo real", css["h1"]),
+        para(
+            "OWASP ZAP 2.17.0 executado localmente em 26/09/2026, "
+            "22h37, contra http://127.0.0.1:8000. Foram importadas 17 URLs "
+            "pela especificação OpenAPI. O scan foi <b>passivo e sem "
+            "autenticação</b>; os relatórios HTML e JSON foram exportados "
+            "após a conclusão da execução.", css["body"],
+        ),
+        table([
+            ["Severidade", "Tipos de alerta", "Tratamento"],
+            ["Alta", "0", "Nenhum alerta desta severidade na varredura."],
+            ["Média", "1", "Alerta 10055 analisado abaixo; risco aceito no TP2 local."],
+            ["Baixa", "2", "Alertas de metadados em bundles estáticos; contexto registrado no relatório."],
+            ["Informativa", "3", "Observações documentadas na exportação integral."],
+        ], [34 * mm, 31 * mm, 108 * mm], css),
+        para("Alerta médio 10055: CSP style-src 'unsafe-inline' em /docs", css["h2"]),
+        para(
+            "<b>Detecção:</b> o ZAP encontrou a diretiva <b>unsafe-inline</b> "
+            "para estilos na página Swagger. <b>Problema:</b> se outra "
+            "falha permitir injetar conteúdo nessa página, estilos "
+            "maliciosos podem ser aplicados. <b>Decisão:</b> risco aceito "
+            "para a demonstração local, <b>não corrigido</b>. O Swagger "
+            "usa estilos dinâmicos e a compatibilidade de sua remoção "
+            "não foi comprovada. A exceção é restrita a /docs; scripts "
+            "continuam limitados à origem e a hash específico. Antes "
+            "de publicação pública, restringir /docs ou testar uma UI "
+            "com CSP mais estrita.", css["body"],
+        ),
+        para("Escopo da conclusão", css["h2"]),
+        para(
+            "Zero alertas altos neste scan não demonstra ausência de "
+            "vulnerabilidades. A varredura sem login não explorou objetos "
+            "de usuários diferentes e não valida BOLA; os testes de "
+            "autorização da página anterior oferecem essa evidência "
+            "separadamente.", css["body"],
+        ),
+        para(
+            "Evidências: <link href='" + REPORT_URL + "' color='#185b91'>triagem por alerta</link>; "
+            "<link href='" + ZAP_HTML_URL + "' color='#185b91'>exportação HTML</link>; "
+            "<link href='" + ZAP_JSON_URL + "' color='#185b91'>exportação JSON</link>.",
+            css["small"],
+        ),
+        PageBreak(),
+    ]
+
+    # Page 8 - interpretation, caveats and submission links.
+    content += [
+        para("Síntese da EDA e continuidade", css["h1"]),
+        para("Insights principais", css["h2"]),
+        bullet("A associação entre comprimento de solicitação e resposta no Bitext é fraca (Spearman aproximadamente 0,05); tamanho da entrada não é proxy simples para o tamanho da resposta.", css["body"]),
+        bullet("No B2W, notas 1-2 acompanham textos mais longos que notas 4-5; a análise por primeira avaliação de cada revisor preserva o efeito, mas não estabelece causa.", css["body"]),
+        bullet("Os 500 rótulos PT-BR foram revisados um a um: 375 concordâncias iniciais, 125 adjudicações, 78 casos incertos e 422 elegíveis para avaliação futura. Kappa inicial de 0,5504; apenas 20 das 46 intenções aparecem na amostra.", css["body"]),
+        para("Limitações", css["h2"]),
         bullet("O Bitext é inglês e híbrido/sintético; frequências e métricas internas não representam automaticamente chamados reais em português.", css["body"]),
         bullet("O B2W contém avaliações de produto de 2018, não chamados de suporte com intenção original.", css["body"]),
         bullet("A amostra humana de 500 é estratificada por nota; 78 casos incertos ficam fora da métrica principal. Não deve estimar a distribuição natural do atendimento.", css["body"]),
-        bullet("O ZAP foi passivo e sem autenticação. Não prova ausência de IDOR ou falhas de negócio; testes de ownership são evidência separada.", css["body"]),
-        bullet("/predictions/predict ainda grava resposta placeholder. Integrar e validar o modelo é etapa posterior, não resultado deste TP2.", css["body"]),
+        bullet("84 decisões de adjudicação não registram justificativa textual; a cobertura de intenções limita uma conclusão forte de generalização.", css["body"]),
+        para("Próximos passos para o classificador", css["h2"]),
+        para(
+            "Executar avaliação externa sobre as 422 linhas elegíveis, "
+            "com métricas por intenção e análise de erro; ampliar "
+            "cobertura e qualidade das justificativas de anotação; "
+            "somente depois integrar um modelo validado. O Macro-F1 "
+            "interno do Bitext (0,9887) não mede desempenho PT-BR. "
+            "/predictions/predict ainda usa resposta placeholder.",
+            css["body"],
+        ),
+        PageBreak(),
         para("Entrega e referências", css["h1"]),
         para(
             "Código, notebooks e relatórios: <link href='" + REPO_URL + "' color='#185b91'>repositório na main</link>.<br/>"
             "Findings detalhados: <link href='" + REPORT_URL + "' color='#185b91'>relatório OWASP ZAP</link>.<br/>"
             "Exportação da ferramenta: <link href='" + ZAP_HTML_URL + "' color='#185b91'>relatório ZAP em HTML</link>.<br/>"
-            "EDA estruturada: <link href='" + REPORT_URL.replace("relatorio_owasp_zap.md", "tp2_data_eda/relatorio.md") + "' color='#185b91'>relatório TP2 de dados</link>.",
+            "EDA estruturada: <link href='" + EDA_URL + "' color='#185b91'>relatório TP2 de dados</link>.",
             css["body"],
         ),
+        para("Arquivos centrais da entrega", css["h2"]),
+        table([
+            ["Item", "Arquivo versionado"],
+            ["EDA B2W", repo_link("notebooks/03_b2w_feedback_eda.ipynb", "notebooks/03_b2w_feedback_eda.ipynb")],
+            ["EDA Bitext", repo_link("notebooks/04_bitext_intent_eda.ipynb", "notebooks/04_bitext_intent_eda.ipynb")],
+            ["Validação PT-BR", repo_link("notebooks/06_ptbr_validated_dataset_eda.ipynb", "notebooks/06_ptbr_validated_dataset_eda.ipynb")],
+            ["Testes da API", repo_link("tests/test_security.py", "tests/test_security.py")],
+            ["Relatório EDA", repo_link("reports/tp2_data_eda/relatorio.md", "reports/tp2_data_eda/relatorio.md")],
+            ["ZAP original", "<link href='" + ZAP_HTML_URL + "' color='#185b91'>reports/zap_report.html</link> e <link href='" + ZAP_JSON_URL + "' color='#185b91'>JSON</link>"],
+        ], [40 * mm, 133 * mm], css),
+        para("Checklist de envio", css["h2"]),
+        bullet("Anexar este PDF no campo próprio do TP2, mantendo o nome solicitado pela disciplina.", css["body"]),
+        bullet("Informar o link do repositório e o link do relatório ZAP; ambos também estão clicáveis acima.", css["body"]),
         para(
             "Fontes dos dados: "
             "<link href='https://github.com/americanas-tech/b2w-reviews01' color='#185b91'>B2W-Reviews01 (CC BY-NC-SA 4.0)</link>; "
@@ -342,9 +472,11 @@ def build() -> Path:
             css["body"],
         ),
         para(
-            "Este PDF resume a evidência versionada no repositório. Os dados "
-            "brutos não foram incorporados ao PDF ou ao Git por tamanho e "
-            "licença; os scripts de download e verificação estão no repositório.",
+            "O relatório de dados no repositório usa as seções Problema, "
+            "Dados, Análise, Insights principais, Limitações e Próximos "
+            "passos. Os dados brutos não foram incorporados ao PDF ou ao Git "
+            "por tamanho e licença; scripts de download e verificação "
+            "permitem reproduzir a análise.",
             css["small"],
         ),
     ]
