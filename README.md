@@ -118,6 +118,17 @@ avaliação externa. Ele não deve ser usado no treinamento do baseline Bitext.
 O notebook descritivo correspondente é
 `notebooks/06_ptbr_validated_dataset_eda.ipynb`.
 
+## TP2 — análise exploratória aprofundada
+
+O [relatório separado de EDA](reports/tp2_data_eda/relatorio.md) reúne o
+heatmap de correlação e os scatter plots do Bitext com o teste formal
+Mann–Whitney da hipótese de comprimento textual do B2W. Os notebooks
+`04_bitext_intent_eda.ipynb` e `03_b2w_feedback_eda.ipynb` contêm o código,
+as saídas executadas e a interpretação. A análise é descritiva e não altera
+API, banco ou controles de segurança. Para verificar os testes da parte de
+dados, execute `python -m pytest tests/test_data_pipeline.py -q` no ambiente
+instalado com `requirements-data.txt`.
+
 ## Ferramentas
  - Jupyter Notebook
  -  Docker
