@@ -139,7 +139,7 @@ Para abrir e executar os notebooks atuais:
 jupyter notebook
 ```
 
-A sequência é `03_b2w_feedback_eda.ipynb`, `04_bitext_intent_eda.ipynb`, `05_bitext_intent_baseline.ipynb` e `06_ptbr_validated_dataset_eda.ipynb`. Os relatórios e figuras principais já estão versionados; reproduzir tudo não é pré-requisito para ler a entrega.
+A sequência é `03_b2w_feedback_eda.ipynb`, `04_bitext_intent_eda.ipynb`, `05_bitext_intent_baseline.ipynb`, `06_ptbr_validated_dataset_eda.ipynb` e `07_tp3_regressao_linear.ipynb`. Os relatórios e figuras principais já estão versionados; reproduzir tudo não é pré-requisito para ler a entrega.
 
 ### Fontes, papéis e licenças
 
@@ -157,6 +157,14 @@ A sequência é `03_b2w_feedback_eda.ipynb`, `04_bitext_intent_eda.ipynb`, `05_b
 - **Hipótese formal:** no B2W, avaliações com notas 1–2 tendem a ter textos mais longos que as de notas 4–5. O teste Mann–Whitney unilateral encontrou `p < 10^-300`, medianas de **154 vs. 102 caracteres** e probabilidade de superioridade de **0,6771**. É uma análise exploratória e observacional, não causal.
 - **Baseline de intenção:** TF-IDF + regressão logística obteve **Macro F1 de 0,9887** no teste interno isolado do Bitext. O número **não** é desempenho em português e o modelo **não** está ligado a `/predictions/predict`. Consulte o [relatório](reports/bitext_intent_model/relatorio.md) e os [erros](reports/bitext_intent_model/erros.md).
 - **Revisão humana:** 500 rótulos finais, sendo 375 por concordância dupla e 125 por adjudicação; 78 casos marcados incertos ficam fora da avaliação principal, restando 422 elegíveis. Concordância simples de 75,00% e kappa de Cohen de 0,5504. A amostra contém 20 das 46 intenções, e 84 decisões adjudicadas não têm justificativa textual recuperável. Ela permanece reservada para avaliação externa; **a métrica nessa amostra ainda não foi calculada**. Veja [protocolo](docs/ptbr_intent_validation_protocol.md), [metodologia](reports/data_methodology/relatorio.md) e [relatório final](reports/ptbr_intent_validation/final_relatorio.md).
+
+## TP3 — parte de dados em preparação
+
+O [notebook de regressão linear múltipla](notebooks/07_tp3_regressao_linear.ipynb) usa apenas características da solicitação Bitext para prever o comprimento numérico da resposta de referência. No teste reservado, obteve **R² 0,0080** e **RMSE 308,82 caracteres**, contra **310,10** ao prever a média do treino. A melhora de RMSE é de apenas **0,41%**: a regressão cumpre o exercício diagnóstico, mas explica muito pouco do alvo e **não é um classificador de intenção**. Veja [resultados, resíduos e Q-Q plot](reports/tp3_data/regressao_linear.md).
+
+A [pergunta de classificação](reports/tp3_data/pergunta_classificacao.md) documenta as 46 intenções e sua distribuição; o [plano técnico de dados para T2](reports/tp3_data/plano_t2_dados.md) delimita o candidato TF-IDF + regressão logística e a futura avaliação externa nas 422 anotações elegíveis, sem usá-las no treinamento. A identificação do colega adversário e a URL da API-alvo dependem de confirmação da equipe; este planejamento **não** substitui a auditoria de segurança nem o PDF consolidado do TP3.
+
+Para reproduzir o notebook após `python scripts/build_bitext_intent_dataset.py`, execute `jupyter notebook` na raiz do projeto e abra `notebooks/07_tp3_regressao_linear.ipynb`. A execução gera `reports/tp3_data/regressao_linear_resultados.json` e as duas figuras de diagnóstico.
 
 ## Testes e OWASP ZAP
 
