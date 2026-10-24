@@ -73,6 +73,7 @@ def test_unauthorized_access_without_token(client: TestClient):
 def test_bola_access_other_user_resource_forbidden(client: TestClient, session: Session):
     user_a = create_test_user(session, "usera", "usera@example.com")
     user_b = create_test_user(session, "userb", "userb@example.com")
+    assert user_b.id is not None
 
     # User B's refund request
     refund_b = RefundRequest(
@@ -100,6 +101,7 @@ def test_bola_access_other_user_resource_forbidden(client: TestClient, session: 
 def test_review_and_prediction_are_private(client: TestClient, session: Session):
     user_a = create_test_user(session, "privatea", "privatea@example.com")
     user_b = create_test_user(session, "privateb", "privateb@example.com")
+    assert user_b.id is not None
     review_b = Review(
         user_id=user_b.id,
         product_name="Produto",
@@ -225,3 +227,41 @@ def test_docs_use_local_assets_and_specific_csp(client: TestClient):
     assert "/static/redoc.standalone.js" in redoc.text
     assert "cdn." not in redoc.text
     assert client.get("/static/redoc.standalone.js").status_code == 200
+
+def test_malformed_and_unknown_user_tokens_rejected(client: TestClient):
+    assert client.get("/users/me", headers={"Authorization": "Bearer nao.e.jwt"}).status_code == 401
+    # token válido na forma, mas de um usuário que não existe
+    assert client.get("/users/me", headers=get_auth_header("fantasma")).status_code == 401
+
+
+def test_viewer_cannot_update_refund_admin_only(client: TestClient, session: Session):
+    user = create_test_user(session, "viewer1", "viewer1@example.com")
+    assert user.id is not None
+
+    refund = RefundRequest(user_id=user.id, order_id="ORD-1", reason="Defeito", amount=50.0)
+    session.add(refund); session.commit(); session.refresh(refund)
+    resp = client.patch(f"/refunds/{refund.id}", json={"status": "approved"},
+                        headers=get_auth_header("viewer1"))
+    assert resp.status_code == 403   # ajuste o corpo ao schema real do PATCH
+
+
+@pytest.mark.parametrize("payload", [
+    {"username": "u1", "email": "nao-é-email", "password": "strongpassword123"},
+    {"username": "u2", "email": "u2@example.com", "password": "123"},
+    {"username": "", "email": "u3@example.com", "password": "strongpassword123"},
+])
+def test_register_rejects_invalid_input(client: TestClient, payload):
+    assert client.post("/auth/register", json=payload).status_code == 422
+
+
+def test_sql_injection_style_login_does_not_error(client: TestClient):
+    resp = client.post("/auth/token", data={"username": "' OR 1=1 --", "password": "x"})
+    assert resp.status_code == 401   # nunca 500 e nunca 200
+
+
+def test_login_error_does_not_reveal_which_field_was_wrong(client: TestClient, session: Session):
+    create_test_user(session, "existe", "existe@example.com")
+    r1 = client.post("/auth/token", data={"username": "existe", "password": "errada"})
+    r2 = client.post("/auth/token", data={"username": "naoexiste", "password": "errada"})
+    assert r1.status_code == r2.status_code == 401
+    assert r1.json() == r2.json()
