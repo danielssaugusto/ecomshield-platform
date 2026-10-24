@@ -12,7 +12,7 @@ Schemas (plain):      Token, TokenData, UserCreate, UserRead,
 from datetime import UTC, datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlmodel import Field, Relationship, SQLModel
 
 # ──────────────────────────────────────────────────────────
@@ -134,9 +134,9 @@ class TokenData(BaseModel):
 # ── User ──────────────────────────────────────────────────
 
 class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+    username: str = Field(min_length=1, max_length=50)
+    email: EmailStr  # Valida automaticamente se o formato do email é válido
+    password: str = Field(min_length=8)
 
     model_config = ConfigDict(extra="forbid")
 

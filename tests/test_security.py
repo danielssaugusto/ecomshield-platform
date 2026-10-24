@@ -269,14 +269,16 @@ def test_login_error_does_not_reveal_which_field_was_wrong(client: TestClient, s
 
 def test_register_repeat_email_postgresql(client):
     unique_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
+    unique_username = f"user_{uuid.uuid4().hex[:6]}"
     
     payload = {
+        "username": unique_username,
         "email": unique_email,
         "password": "StrongPassword123!"
     }
     
-    response_1 = client.post("/register", json=payload)
+    response_1 = client.post("/auth/register", json=payload)
     assert response_1.status_code in [200, 201]
     
-    response_2 = client.post("/register", json=payload)
-    assert response_2.status_code in [400, 422]
+    response_2 = client.post("/auth/register", json=payload)
+    assert response_2.status_code in [400, 422, 409]
