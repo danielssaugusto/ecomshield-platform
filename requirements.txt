@@ -13,6 +13,7 @@ bcrypt==4.0.1
 # ── Database (PostgreSQL + ORM) ───────────────────────────
 sqlmodel
 psycopg2-binary
+psycopg[binary]
 
 # ── Data Science / EDA ────────────────────────────────────
 pandas
