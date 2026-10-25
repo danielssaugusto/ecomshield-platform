@@ -5,12 +5,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import (
-    get_redoc_html,
-    get_swagger_ui_html,
-    get_swagger_ui_oauth2_redirect_html,
-)
+from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
 from fastapi.staticfiles import StaticFiles
 
 from src.app.config import settings
@@ -59,7 +56,7 @@ def swagger_docs():
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         f"script-src 'self' 'sha256-{digest}'; "
-        "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+        "style-src 'self'; img-src 'self' data:; "
         "font-src 'self' data:; connect-src 'self'; "
         "object-src 'none'; base-uri 'self'; form-action 'self'; "
         "frame-ancestors 'none';"
@@ -74,21 +71,8 @@ def swagger_redirect():
 
 @app.get("/redoc", include_in_schema=False)
 def redoc_docs():
-    response = get_redoc_html(
-        openapi_url=app.openapi_url,
-        title=f"{app.title} - ReDoc",
-        redoc_js_url="/static/redoc.standalone.js",
-        redoc_favicon_url="/static/favicon.svg",
-        with_google_fonts=False,
-    )
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; script-src 'self'; "
-        "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
-        "font-src 'self' data:; connect-src 'self'; "
-        "object-src 'none'; base-uri 'self'; form-action 'self'; "
-        "frame-ancestors 'none';"
-    )
-    return response
+    """Keep the legacy documentation URL without exposing a weaker CSP page."""
+    return RedirectResponse(url="/docs", status_code=307)
 
 
 # ── Middleware: HTTP Security Headers ─────────────────────

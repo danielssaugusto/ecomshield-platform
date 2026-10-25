@@ -216,6 +216,7 @@ def test_docs_use_local_assets_and_specific_csp(client: TestClient):
     assert "/static/swagger-ui.css" in response.text
     assert "cdn.jsdelivr.net" not in response.text
     assert "sha256-" in response.headers["Content-Security-Policy"]
+    assert "'unsafe-inline'" not in response.headers["Content-Security-Policy"]
     inline_script = re.search(rb"<script>(.*?)</script>", response.content, re.DOTALL)
     assert inline_script is not None
     digest = base64.b64encode(hashlib.sha256(inline_script.group(1)).digest()).decode()
@@ -223,11 +224,9 @@ def test_docs_use_local_assets_and_specific_csp(client: TestClient):
     assert client.get("/static/swagger-ui-bundle.js").status_code == 200
     assert client.get("/static/swagger-ui.css").status_code == 200
 
-    redoc = client.get("/redoc")
-    assert redoc.status_code == 200
-    assert "/static/redoc.standalone.js" in redoc.text
-    assert "cdn." not in redoc.text
-    assert client.get("/static/redoc.standalone.js").status_code == 200
+    redoc = client.get("/redoc", follow_redirects=False)
+    assert redoc.status_code == 307
+    assert redoc.headers["location"] == "/docs"
 
 def test_malformed_and_unknown_user_tokens_rejected(client: TestClient):
     assert client.get("/users/me", headers={"Authorization": "Bearer nao.e.jwt"}).status_code == 401
@@ -267,7 +266,7 @@ def test_login_error_does_not_reveal_which_field_was_wrong(client: TestClient, s
     assert r1.status_code == r2.status_code == 401
     assert r1.json() == r2.json()
 
-def test_register_repeat_email_postgresql(client):
+def test_register_repeat_email_rejected(client):
     unique_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
     unique_username = f"user_{uuid.uuid4().hex[:6]}"
     
