@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SECRET_KEY: ci-only-key-nao-usar-em-producao-0123456789abcdef
-      DATABASE_URL: postgresql+psycopg2://user:pass@localhost:5432/ci
+      DATABASE_URL: sqlite://
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

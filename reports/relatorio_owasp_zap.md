@@ -1,5 +1,14 @@
 # TP2 — verificação com OWASP ZAP
 
+> **Atualização TP3 (25/10/2026):** o finding Medium histórico de
+> `style-src 'unsafe-inline'` foi tratado no código: `/docs` agora usa
+> `style-src 'self'` e o Swagger foi verificado em navegador, além do teste
+> automatizado correspondente. Como o ReDoc depende de estilos inline,
+> `/redoc` passou a redirecionar para `/docs`, preservando a documentação sem
+> manter uma segunda página com CSP enfraquecida. Este arquivo e as exportações
+> HTML/JSON abaixo são a evidência histórica do scan TP2; a reexecução do ZAP
+> contra esta revisão permanece necessária para substituir os artefatos.
+
 ## Execução e escopo
 
 Em **26/09/2026, 22h37 (America/Sao_Paulo)**, executamos o **OWASP ZAP
