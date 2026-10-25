@@ -12,6 +12,10 @@ O arquivo final preserva as duas opiniões, a decisão de adjudicação quando
 necessária e o método que originou cada rótulo validado.
 
 Os registros com `has_uncertainty_flag=true` são preservados para auditoria,
-mas ficam fora da métrica principal. O conjunto usa 20
-das 46 intenções da taxonomia. A amostra foi estratificada por nota e não
-representa a distribuição operacional de chamados de atendimento.
+mas ficam fora da métrica principal. Os 500 registros usam
+20 das 46 intenções da taxonomia; os
+422 elegíveis usam apenas 14.
+A classe mais frequente entre os elegíveis é
+`submit_product_feedback` (292 registros).
+A amostra foi estratificada por nota e não representa a distribuição
+operacional de chamados de atendimento.

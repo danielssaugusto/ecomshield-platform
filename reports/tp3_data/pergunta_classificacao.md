@@ -54,12 +54,13 @@ Bitext; seu Macro-F1 não pode ser extrapolado para português real.
 ## Limite da validação externa
 
 O B2W-Reviews01 contém avaliações reais em português, mas **nota não é
-intenção**. Uma amostra de 500 textos recebeu rótulos humanos; 422 registros
-sem marca de incerteza são elegíveis para avaliação externa e permanecem fora
-do treinamento. Essa amostra cobre apenas **20 das 46 intenções** e foi
-estratificada por nota. Assim, a futura avaliação deverá apresentar suporte
-por intenção e não alegar desempenho para classes ausentes ou para a
-distribuição natural de chamados.
+intenção**. Uma amostra de 500 textos recebeu rótulos humanos e cobre **20 das
+46 intenções**. Destes, 422 registros sem marca de incerteza são elegíveis para
+avaliação externa, cobrem **14 intenções** e permanecem fora do treinamento.
+O rótulo `submit_product_feedback` concentra 292 dos 422 elegíveis. A amostra
+foi estratificada por nota. A avaliação externa apresenta suporte por intenção
+e não atribui desempenho às 32 classes ausentes nem à distribuição natural de
+chamados. Veja o [resultado PT-BR](avaliacao_externa_ptbr.md).
 
 Fontes: [distribuição e proveniência do Bitext](../bitext_retail_intents/relatorio.md)
 e [relatório da validação PT-BR](../ptbr_intent_validation/final_relatorio.md).

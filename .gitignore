@@ -223,6 +223,10 @@ data/annotations/annotator_*.csv
 data/annotations/ptbr_intent_adjudication.csv
 models/*.joblib
 
+# Planilha local de revisão humana: contém textos reais do B2W.
+outputs/tp3-adjudication/
+outputs/tp3-consumerbr/
+
 # Ruff stuff:
 .ruff_cache/
 

@@ -35,22 +35,42 @@ igual às classes; nenhuma média isolada substituirá a análise dos rótulos
 confundidos. A linha de base existente obteve Macro-F1 **0,9887 no teste
 interno do Bitext**; esse número não mede generalização em PT-BR.
 
-Na avaliação externa, os **422 textos PT-BR elegíveis** não serão usados para
-ajustar vetorizador, modelo, hiperparâmetros ou limiar. O protocolo deverá
-registrar versão do modelo antes do teste, apresentar resultados por intenção
-com suporte, exemplos anonimizados de erros e eventual abstinência/fora de
-escopo. Só **20 das 46 intenções** têm suporte na amostra; classes sem suporte
-não receberão uma estimativa de desempenho. Como a seleção foi estratificada
-por nota, a média nessa amostra não estimará prevalência em produção.
+Na [avaliação externa TP3](avaliacao_externa_ptbr.md), os **422 textos PT-BR
+elegíveis** não foram usados para ajustar vetorizador, modelo, hiperparâmetros
+ou limiar. O relatório registra o hash do modelo, resultados por intenção com
+suporte e erros rastreáveis por ID opaco. As 500 anotações cobrem 20 intenções,
+mas somente **14 das 46** aparecem no subconjunto elegível; as 32 classes sem
+suporte não recebem estimativa de desempenho. Como a seleção foi estratificada
+por nota, a média nessa amostra não estima prevalência em produção.
+
+O baseline inglês teve desempenho externo muito baixo. No T2, qualquer
+adaptação linguística ou novo modelo terá de ser definida e ajustada com dados
+de desenvolvimento separados, sem reutilizar os 422 registros como treino ou
+conjunto de escolha de hiperparâmetros. Se os 422 forem consultados repetidas
+vezes para selecionar abordagens, deixarão de funcionar como teste externo
+independente; será necessário obter outra amostra humana reservada.
+
+Um [experimento adicional de transferência multilíngue](transferencia_multilingue.md)
+selecionou o hiperparâmetro apenas na validação Bitext e chegou a 38/422
+(9,0%) na amostra PT-BR. O ganho sobre 6/422 não aproxima a meta de 60%.
+O resultado reforça a mudança de domínio e de definição dos rótulos:
+`submit_product_feedback` no Bitext é um pedido para enviar feedback, enquanto
+um review B2W já é o próprio feedback. Não se pode corrigir isso somente com
+um encoder multilíngue. Ver o [plano de dados para a meta de
+60%](plano_melhoria_intencoes_ptbr.md).
 
 ## Qualidade da anotação e próximos dados
 
 Os 78 textos marcados como incertos ficam fora da métrica principal. A próxima
 rodada de anotação deve ampliar as intenções sub-representadas e coletar
 justificativa textual para todas as adjudicações; hoje **84 decisões** não
-possuem essa justificativa. Antes de ampliar, serão definidos critérios de
-inclusão, manual de rótulos, dupla revisão e controle de versões para evitar
-mudanças silenciosas no conjunto de avaliação.
+possuem essa justificativa. Uma planilha local reúne esses 84 casos para retorno
+dos revisores, sem alterar os rótulos existentes. Antes de ampliar, serão
+definidos critérios de inclusão, manual de rótulos, dupla revisão e controle de
+versões para evitar mudanças silenciosas no conjunto de avaliação. Reviews B2W
+continuam úteis para avaliar feedback de produto, mas a próxima coleta deve
+incluir solicitações reais de suporte para cobrir intenções de conta, pagamento
+e pedidos que quase não aparecem em avaliações de produto.
 
 ## Dependência de equipe para o documento T2 completo
 
