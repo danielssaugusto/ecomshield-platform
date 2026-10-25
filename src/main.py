@@ -136,3 +136,31 @@ def health_check():
         "status": "ok",
         "message": "API operacional",
     }
+
+# ── Home Page ──────────────────────────────────────────
+
+@app.get("/", tags=["Root"])
+def read_root():
+    """
+    Página inicial da API.
+    Retorna metadados do serviço, status e links rápidos para documentação.
+    """
+    return {
+        "name": settings.APP_NAME,
+        "status": "operational",
+        "version": "1.0.0",
+        "description": "API da Plataforma EcomShield com controles de segurança OWASP e ML integrados.",
+        "documentation": {
+            "swagger_ui": "/docs",
+            "redoc": "/redoc",
+            "openapi_schema": app.openapi_url,
+        },
+        "endpoints": {
+            "auth": "/auth",
+            "users": "/users",
+            "reviews": "/reviews",
+            "predictions": "/predictions",
+            "refunds": "/refunds",
+            "health": "/health",
+        },
+    }
