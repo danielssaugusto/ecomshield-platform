@@ -1,0 +1,46 @@
+{
+  "source_doi": "10.5281/zenodo.18022568",
+  "source_url": "https://zenodo.org/api/records/18022568/files/ConsumerBR.zip/content",
+  "source_archive_md5_as_published": "d301043b0dd0ad7658a6edcd42372c7a",
+  "source_license": "CC BY 4.0",
+  "archive_verified_in_full": false,
+  "first_source_rows_scanned": 30000,
+  "selection": "exact company strata; unique 80–1800-character complaints; SHA-256 rank",
+  "salt": "ecomshield-consumerbr-pilot-v1",
+  "rows_per_company": 40,
+  "reserved_per_company": 10,
+  "development_rows": 240,
+  "reserved_rows": 80,
+  "raw_company_counts": {
+    "Casasbahia.com": 287,
+    "Magazine Luiza - Loja Online": 404,
+    "Mercado Livre": 322,
+    "Americanas.com": 308,
+    "Shopee Brasil": 80,
+    "Submarino": 76,
+    "Carrefour.com": 73,
+    "Amazon.com.br": 124
+  },
+  "eligible_company_counts": {
+    "Magazine Luiza - Loja Online": 365,
+    "Mercado Livre": 288,
+    "Americanas.com": 283,
+    "Casasbahia.com": 256,
+    "Amazon.com.br": 111,
+    "Shopee Brasil": 75,
+    "Submarino": 70,
+    "Carrefour.com": 61
+  },
+  "development_id_sha256": "3ffd6344ea3ffa4d99c0b91f9cf5d55ccd9007b1d225611e788127b0ef390ac8",
+  "reserved_id_sha256": "47025e1c1ff6c35d9de7b1db5e457a1deffbb095b3e386375f5772a8a8bf1d54",
+  "development_file_sha256": "4ce1b11121c4fde0cc52602389e63e028f0dac14e8d9d7e0c713122decda4a24",
+  "reserved_file_sha256": "aedf58ba183d4791988e248f5d3e787d5d49ab2e6f7a68ae6d212aeaf266cbe2",
+  "human_intent_labels_available": false,
+  "test_status": "reserved and unlabeled; do not use for model selection",
+  "limitations": [
+    "Convenience frame: first N rows of source, not a random sample of all ConsumerBR.",
+    "Company-stratified complaints, not representative prevalence of live support.",
+    "Published anonymization may leave residual personal information; keep private and review.",
+    "Company and source metadata are sampling/audit fields, not intent labels or model features."
+  ]
+}

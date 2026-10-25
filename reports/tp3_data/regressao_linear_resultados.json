@@ -1,0 +1,31 @@
+{
+  "dataset": "bitext-retail-ecommerce-intents-v1",
+  "target": "response_length_chars",
+  "features": [
+    "request_chars",
+    "request_words",
+    "question_marks",
+    "exclamation_marks",
+    "digits"
+  ],
+  "train_rows": 35906,
+  "test_rows": 4489,
+  "identical_texts_across_train_test": 0,
+  "scores": {
+    "linear_regression": {
+      "r2": 0.008020940645151908,
+      "rmse_chars": 308.824328154618
+    },
+    "train_mean_baseline": {
+      "r2": -0.00017761760368051327,
+      "rmse_chars": 310.0978955015845
+    }
+  },
+  "residual_summary": {
+    "residual_median": -19.678243487512646,
+    "residual_p05": -474.5478406433774,
+    "residual_p95": 519.1303166708545
+  },
+  "model": "StandardScaler + LinearRegression",
+  "baseline": "DummyRegressor(strategy=mean)"
+}

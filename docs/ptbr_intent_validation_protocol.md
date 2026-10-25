@@ -79,12 +79,30 @@ final previamente validado.
 ## Limites
 
 O B2W é uma fonte de avaliações reais, mas não publicou intenção como rótulo
-original. Por isso, esta etapa demanda pessoas que dominem o domínio de
-e-commerce e o vocabulário dos rótulos. Até existir essa revisão humana, o
-resultado de 0,9887 de Macro F1 do Bitext permanece estritamente interno ao
-corpus de origem.
+original. Por isso, a revisão humana exigiu familiaridade com e-commerce e
+com o vocabulário dos rótulos. O resultado de 0,9887 de Macro F1 do Bitext
+permanece estritamente interno ao corpus de origem; a transferência ao PT-BR
+foi medida separadamente no TP3.
 
 No conjunto recebido, 78 casos foram marcados incertos e estão excluídos da
-amostra principal de 422. Entre 125 divergências adjudicadas, 84 não continham
-justificativa textual na planilha recebida. A decisão final está registrada,
-mas sua motivação não pode ser reconstituída sem os revisores; não a inventamos.
+amostra principal de 422. As 500 anotações cobrem 20 intenções; as 422 elegíveis
+cobrem 14. Entre 125 divergências adjudicadas, 84 não continham justificativa
+textual na planilha recebida, incluindo 60 registros elegíveis. A decisão final
+está registrada, mas sua motivação não pode ser reconstituída sem os revisores;
+não a inventamos. A [avaliação externa do TP3](../reports/tp3_data/avaliacao_externa_ptbr.md)
+usa o baseline congelado e não altera estes rótulos.
+
+## Complemento das justificativas
+
+Há uma planilha local em `outputs/tp3-adjudication/pendencias_justificativas.xlsx`
+com as 84 decisões sem justificativa, sendo 60 da amostra elegível. Ela reúne o
+texto original, os dois votos e a decisão humana já registrada. O revisor deve
+preencher somente **Justificativa textual** e **Revisor**; a coluna **Situação**
+passa a "Completo" quando ambos os campos estão preenchidos. A planilha contém
+avaliações reais e está excluída do Git. Não a publique no repositório.
+
+Ao receber as respostas, confira os 84 IDs, os dois votos e a decisão final
+contra o manifesto atual. Importe somente as justificativas e a identificação
+do revisor, preservando os rótulos, e versione uma nova revisão do manifesto.
+Até essa revisão humana acontecer, mantenha os 84 casos explicitamente
+registrados como sem justificativa; não gere explicações por modelo ou regra.

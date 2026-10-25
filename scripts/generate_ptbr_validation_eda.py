@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Generate descriptive artifacts for the human-validated PT-BR dataset."""
 from __future__ import annotations
 
@@ -84,16 +83,18 @@ Bitext. Essa separação preserva a validade da comparação futura.
 - Rótulos por adjudicação: {(frame['validation_method'] == 'human_adjudication').sum():,}
 - Registros com incerteza: {(frame['has_uncertainty_flag'] == 'True').sum():,}
 - Registros elegíveis para métrica principal: {len(eligible):,}
+- Intenções com suporte entre elegíveis: {eligible['validated_intent'].nunique()} de 46
 
 ## Interpretação responsável
 
 A distribuição é concentrada: `submit_product_feedback` representa
-{all_counts.get('submit_product_feedback', 0) / len(frame):.2%} do conjunto.
-Entre os dados elegíveis, {rare} intenções têm menos de cinco exemplos. Por
-isso, uma futura avaliação deve divulgar suporte por intenção e não apresentar
-Macro F1 isoladamente como resultado conclusivo. O baseline atual é em inglês;
-não se calcula desempenho dele neste conjunto PT-BR sem uma estratégia
-linguística declarada e testada.
+{all_counts.get('submit_product_feedback', 0) / len(frame):.2%} dos 500 registros e
+{eligible_counts.get('submit_product_feedback', 0) / len(eligible):.2%} dos elegíveis.
+Entre os dados elegíveis, {rare} intenções têm menos de cinco exemplos. O
+resultado externo do baseline inglês está no
+[relatório TP3](../tp3_data/avaliacao_externa_ptbr.md).
+Sua interpretação exige suporte por intenção, comparação com a classe
+majoritária e análise dos erros; Macro-F1 isolado não é conclusivo.
 
 ## Figuras
 
