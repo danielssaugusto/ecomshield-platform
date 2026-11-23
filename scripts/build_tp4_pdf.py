@@ -40,7 +40,7 @@ def main() -> None:
     story = [
         p("E-ComShield", title),
         p("PB TP4 - Classificador de intenções, agente autônomo e log parcial de pentest", subtitle),
-        p("Autores: Daniel Augusto da Silva e Nathalia Calazans Artigas<br/>Data de entrega: 22/11/2026", body),
+        p("Autores: Daniel Augusto da Silva e Nathalia Calazans Artigas<br/>Data de entrega: 22/11/2026<br/>Repositório: <link href='https://github.com/danielssaugusto/ecomshield-platform/tree/main'><u>main</u></link> | Entrega TP4: <link href='https://github.com/danielssaugusto/ecomshield-platform/tree/feature/dataset-security-remediation'><u>feature/dataset-security-remediation</u></link>", body),
         Spacer(1, 8),
         p("Objetivo", heading),
         p("Integrar um classificador de intenções à API FastAPI, expor uma rota autenticada por JWT, preparar um agente de atendimento que usa a classificação como ferramenta e registrar, de modo responsável, o pentest parcial autorizado da API adversária.", body),
