@@ -75,6 +75,9 @@ data/annotations/ptbr_intent_validation_queue_metadata.json
 data/annotations/annotator_*.csv
 data/annotations/ptbr_intent_adjudication.csv
 models/*.joblib
+!models/bitext_intent_tfidf_logreg.joblib
+tmp/
+.DS_Store
 
 # Flask stuff:
 instance/
