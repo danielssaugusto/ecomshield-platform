@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
 from fastapi.staticfiles import StaticFiles
@@ -129,4 +129,23 @@ def health_check():
 def read_root():
     """Serve o frontend (index.html) na raiz da aplicação."""
     index = FRONTEND_DIR / "index.html"
-    return FileResponse(str(index), media_type="text/html")
+    html_bytes = index.read_bytes()
+
+    # Compute SHA-256 hash of every inline <script> block so the strict
+    # Content-Security-Policy set by the security-headers middleware allows them.
+    hashes = []
+    for m in re.finditer(rb"<script>(.*?)</script>", html_bytes, re.DOTALL):
+        digest = base64.b64encode(hashlib.sha256(m.group(1)).digest()).decode()
+        hashes.append(f"'sha256-{digest}'")
+
+    script_src = " ".join(["'self'"] + hashes) if hashes else "'self'"
+
+    from fastapi.responses import HTMLResponse
+    response = HTMLResponse(content=html_bytes.decode("utf-8"))
+    response.headers["Content-Security-Policy"] = (
+        f"default-src 'self'; script-src {script_src}; "
+        "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+        "font-src 'self' data:; connect-src 'self'; "
+        "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    )
+    return response
