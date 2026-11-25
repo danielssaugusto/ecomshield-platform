@@ -2,11 +2,8 @@
 name = "ecomshield"
 version = "0.1.0"
 description = "Secure e-commerce refund and risk management platform"
-<<<<<<< HEAD
 requires-python = ">=3.10"
-=======
-requires-python = ">=3.11"
->>>>>>> origin/main
+
 
 dependencies = [
     "fastapi",
@@ -16,12 +13,9 @@ dependencies = [
     "python-jose[cryptography]",
     "passlib[bcrypt]",
     "python-multipart",
-<<<<<<< HEAD
     "sqlalchemy",
-=======
     "sqlmodel",
     "psycopg2-binary",
->>>>>>> origin/main
     "pandas",
     "certifi",
     "pyarrow",
@@ -29,14 +23,11 @@ dependencies = [
     "matplotlib",
     "seaborn",
     "jupyter",
-<<<<<<< HEAD
     "pyarrow",
     "scikit-learn",
     "joblib",
     "openai-agents>=0.19.4,<0.20",
-=======
     "scikit-learn"
->>>>>>> origin/main
 ]
 
 [project.optional-dependencies]
