@@ -1,0 +1,213 @@
+# E-ComShield
+
+Projeto acadêmico de análise de feedback e intenções em e-commerce, com API FastAPI e verificações de segurança para o TP2.
+
+**Autores:** Nathalia Calazans Artigas e Daniel Augusto da Silva.
+
+> O projeto separa a análise de dados da aplicação. O B2W-Reviews01 contém avaliações reais em português, mas não traz intenção de atendimento anotada. O Bitext traz rótulos de intenção publicados pela fonte, porém é um corpus em inglês e híbrido/sintético. A API ainda **não** usa o classificador: `/predictions/predict` grava uma resposta *placeholder*.
+
+## Índice
+
+- [O que foi entregue](#o-que-foi-entregue)
+- [Início rápido da API com Docker Compose](#início-rápido-da-api-com-docker-compose)
+- [Execução local da API](#execução-local-da-api)
+- [Rotas e controles de segurança](#rotas-e-controles-de-segurança)
+- [Reproduzir a parte de dados](#reproduzir-a-parte-de-dados)
+- [Resultados de dados e do TP2](#resultados-de-dados-e-do-tp2)
+- [Testes e OWASP ZAP](#testes-e-owasp-zap)
+- [Entrega, limitações e próximos passos](#entrega-limitações-e-próximos-passos)
+
+## O que foi entregue
+
+| Área | Evidência principal |
+| --- | --- |
+| EDA aprofundada do TP2 | [Relatório estruturado](reports/tp2_data_eda/relatorio.md), [notebook B2W](notebooks/03_b2w_feedback_eda.ipynb) e [notebook Bitext](notebooks/04_bitext_intent_eda.ipynb) |
+| Classificação exploratória | [Baseline Bitext](reports/bitext_intent_model/relatorio.md) e [análise de erros](reports/bitext_intent_model/erros.md); **não integrado à API** |
+| Revisão humana PT-BR | [Metodologia](reports/data_methodology/relatorio.md), [protocolo](docs/ptbr_intent_validation_protocol.md) e [relatório final](reports/ptbr_intent_validation/final_relatorio.md) |
+| API e segurança | [Código FastAPI](src/main.py), [DFD](DFD.md), [testes](tests/test_security.py) e [triagem do ZAP](reports/relatorio_owasp_zap.md) |
+| Entrega acadêmica | [PDF do TP2](output/pdf/nathalia_artigas_PB_TP2.PDF) |
+
+Os notebooks `01_data_cleaning.ipynb` e `02_eda.ipynb` documentam a exploração inicial do TP1. Para os resultados atuais do TP2, use os notebooks `03` a `06` e os relatórios vinculados acima.
+
+### Estrutura resumida
+
+| Caminho | Conteúdo |
+| --- | --- |
+| `src/app/routers/`, `src/app/models.py`, `src/app/database.py` | Rotas, schemas/tabelas SQLModel e acesso ao banco |
+| `scripts/` | Download verificado, preparação dos dados, baseline, relatórios, ZAP e geração do PDF |
+| `notebooks/` | EDA, avaliação do baseline e análise descritiva da amostra humana |
+| `data/annotations/` | Decisões humanas e manifesto de proveniência, sem textos brutos das avaliações |
+| `reports/` | Relatórios, figuras, resultados do ZAP e limitações |
+| `output/pdf/` | PDF final do TP2 |
+
+## Início rápido da API com Docker Compose
+
+**Pré-requisitos:** Git e Docker com o comando `docker compose`. O Compose sobe PostgreSQL 16 e a API. As credenciais do exemplo são apenas para desenvolvimento local.
+
+```bash
+git clone https://github.com/danielssaugusto/ecomshield-platform.git
+cd ecomshield-platform
+cp .env.example .env
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Copie a chave gerada para `SECRET_KEY=<valor>` em `.env` (descomente a linha). Mantenha-a secreta e estável entre reinícios: sem essa configuração, a aplicação gera uma nova chave a cada processo e tokens emitidos anteriormente deixam de valer. A URL `DATABASE_URL` de `.env.example` usa o host `db`, válido **dentro** da rede do Compose. Se quiser criar o administrador no primeiro boot, defina também `ADMIN_BOOTSTRAP_PASSWORD` com uma senha forte. Não publique `.env`.
+
+No PowerShell, use `Copy-Item .env.example .env` em vez de `cp`; os demais comandos Docker são os mesmos.
+
+```bash
+docker compose up --build -d
+docker compose ps
+curl http://127.0.0.1:8000/health
+```
+
+A resposta esperada é `{"status":"ok","message":"API operacional"}`. Esse endpoint confirma que a API responde; **não** testa sozinho a disponibilidade do banco. Para acompanhar a inicialização e parar os serviços:
+
+```bash
+docker compose logs -f api
+docker compose down
+```
+
+`docker compose down` mantém o volume `pgdata`. **Não** acrescente `-v` se quiser preservar o banco. O esquema é criado na inicialização via SQLModel; o projeto não dispõe de migrações de banco. Em um banco criado por versões antigas, uma conta `admin` existente pode conservar senha antiga: revise-a antes de expor a API.
+
+- Saúde: <http://127.0.0.1:8000/health>
+- Swagger UI: <http://127.0.0.1:8000/docs>
+- ReDoc: <http://127.0.0.1:8000/redoc>
+- OpenAPI: <http://127.0.0.1:8000/openapi.json>
+
+As interfaces Swagger/ReDoc usam recursos estáticos locais, com origem, licença e hashes descritos em [`src/app/static/THIRD_PARTY.md`](src/app/static/THIRD_PARTY.md).
+
+## Execução local da API
+
+Use **Python 3.11 ou superior** e um PostgreSQL acessível ao processo local. A `DATABASE_URL` padrão do Compose (`@db:5432`) **não funciona fora dos contêineres**; para execução local, configure em `.env` uma URL com host e credenciais reais, por exemplo `postgresql://usuario:senha@localhost:5432/ecomshield`. O banco e o usuário já devem existir.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+uvicorn src.main:app --reload
+```
+
+No PowerShell, ative o ambiente com `.venv\Scripts\Activate.ps1`. O `--reload` serve apenas ao desenvolvimento; o [Dockerfile](Dockerfile) inicia sem ele. Configure uma `SECRET_KEY` persistente antes de usar autenticação de forma contínua. O arquivo `.env.example` explica as variáveis principais; `ALLOWED_ORIGINS` tem uma lista explícita em [`src/app/config.py`](src/app/config.py).
+
+## Rotas e controles de segurança
+
+| Rota | Uso e acesso |
+| --- | --- |
+| `POST /auth/register` | Cadastro público; cria somente usuário `viewer`; não aceita escolha de papel |
+| `POST /auth/token` | Login via formulário `username`/`password`; devolve JWT |
+| `GET /users/me` | Perfil do usuário autenticado |
+| `GET /users/`, `GET /users/{id}` | Visão limitada ao próprio usuário; administrador pode consultar outros |
+| `POST /reviews/`, `GET /reviews/`, `GET /reviews/{id}` | Avaliações vinculadas ao usuário; leitura filtrada por dono ou administrador |
+| `POST /predictions/predict`, `GET /predictions/`, `GET /predictions/{id}` | Registra e consulta predições por usuário; o resultado de `predict` ainda é *placeholder* |
+| `POST /refunds/`, `GET /refunds/`, `GET /refunds/{id}` | Solicitações de reembolso vinculadas ao usuário |
+| `PATCH /refunds/{id}` | Atualização restrita ao administrador |
+| `GET /health` | Estado básico da API, sem autenticação |
+
+Os schemas de entrada usam Pydantic com `extra="forbid"`, recusando campos não previstos. As consultas usam SQLModel/SQLAlchemy. Recursos por ID e listagens são verificados por usuário para mitigar BOLA/IDOR. Isso **não** substitui uma tabela real de pedidos: `order_id` em reembolsos é um identificador informado na solicitação, sem validação contra um catálogo de pedidos nesta versão.
+
+A autenticação usa senha com hash e JWT. Usuários desativados não conseguem fazer login nem reutilizar token. Com `ADMIN_BOOTSTRAP_PASSWORD` configurada, a inicialização cria o usuário `admin` apenas se ele ainda não existir; não existe senha padrão de administrador nem rotação automática de uma conta antiga. O middleware envia HSTS, `X-Frame-Options`, `X-Content-Type-Options` e CSP, além de CORS com allowlist. HSTS protege conexões HTTPS, não transforma HTTP local em TLS.
+
+### Limite de autenticação
+
+`POST /auth/token` aceita **5 tentativas por endereço IP em janela móvel de 60 segundos**; a seguinte recebe HTTP 429 com `Retry-After`. O valor reduz rajadas de tentativas automatizadas e tolera poucos erros de digitação em uma demonstração local. O contador é **em memória e por processo**: reiniciar a API o zera, workers não compartilham contagens e pessoas atrás do mesmo IP/NAT dividem a cota. Antes de produção, é necessário armazenamento compartilhado, tratamento correto de proxy/IP e monitoramento.
+
+## Reproduzir a parte de dados
+
+A parte de dados é independente da API e do banco. Use Python 3.10 ou superior, acesso à internet para obter os datasets e espaço em disco para CSVs/Parquet. Execute os comandos na raiz do repositório:
+
+```bash
+python3 -m venv .venv-data
+source .venv-data/bin/activate
+python -m pip install -r requirements-data.txt
+
+python scripts/download_b2w_reviews.py
+python scripts/build_bitext_intent_dataset.py
+python scripts/rebuild_ptbr_validation_dataset.py
+python scripts/generate_b2w_feedback_eda.py
+python scripts/generate_ptbr_validation_eda.py
+python scripts/train_bitext_intent_baseline.py
+python scripts/evaluate_ptbr_external.py
+python scripts/build_tp3_classification_pdf.py
+```
+
+No Windows, crie o ambiente com `python -m venv .venv-data` e ative-o no PowerShell com `.venv-data\Scripts\Activate.ps1` antes de instalar as dependências.
+
+O primeiro download obtém o B2W; o segundo script obtém o Bitext, se necessário. Ambos fixam revisão/URL e verificam SHA-256. `rebuild_ptbr_validation_dataset.py` reconstrói a amostra final usando as **decisões humanas versionadas** em `data/annotations/`; não inventa rótulos novos. CSVs/Parquet brutos ou derivados, bem como o modelo `.joblib`, são gerados localmente e não entram no Git. Para regenerar a fila original de anotação, separadamente, use `python scripts/create_ptbr_validation_queue.py`; isso **não** substitui as anotações já concluídas.
+
+Para abrir e executar os notebooks atuais:
+
+```bash
+jupyter notebook
+```
+
+A sequência é `03_b2w_feedback_eda.ipynb`, `04_bitext_intent_eda.ipynb`, `05_bitext_intent_baseline.ipynb`, `06_ptbr_validated_dataset_eda.ipynb` e `07_tp3_regressao_linear.ipynb`. Os relatórios e figuras principais já estão versionados; reproduzir tudo não é pré-requisito para ler a entrega.
+
+### Fontes, papéis e licenças
+
+| Fonte | Papel e volume utilizado | Limite importante |
+| --- | --- | --- |
+| [B2W-Reviews01](https://github.com/americanas-tech/b2w-reviews01) — CC BY-NC-SA 4.0 | 132.373 avaliações originais; 131.347 feedbacks após limpeza. Fonte de EDA e amostra humana PT-BR. | Avaliações de 2018, não chamados de suporte nem intenções originalmente anotadas. Uso não comercial, atribuição e compartilhamento conforme a licença. |
+| [Bitext Retail eCommerce](https://huggingface.co/datasets/bitext/Bitext-retail-ecommerce-llm-chatbot-training-dataset) — CDLA-Sharing-1.0 | 44.884 solicitações preparadas, 46 intenções e 13 categorias originais. Fonte de rótulos para baseline. | Corpus em inglês, híbrido/sintético; não equivale a desempenho em atendimento brasileiro. |
+| Amostra B2W revisada por humanos | 500 avaliações com dupla anotação e adjudicação de divergências. Reservada para avaliação externa. | Amostragem balanceada por nota; não estima distribuição operacional de intenções. |
+
+**Não treinamos intenções usando rótulos criados por palavras-chave no B2W.** O Bitext foi dividido de forma determinística em treino, validação e teste (aproximadamente 80/10/10), agrupando textos idênticos na mesma partição; houve zero sobreposição textual **exata** entre elas. Isso não prova ausência de paráfrases ou outras formas de vazamento semântico. As respostas de referência do Bitext não entram como entrada do classificador.
+
+## Resultados de dados e do TP2
+
+- **EDA de intenções:** o [relatório TP2](reports/tp2_data_eda/relatorio.md) traz heatmap de Spearman, dois scatter plots e interpretação. Comprimento da solicitação e da resposta têm correlação aproximada de **0,05** neste corpus.
+- **Hipótese formal:** no B2W, avaliações com notas 1–2 tendem a ter textos mais longos que as de notas 4–5. O teste Mann–Whitney unilateral encontrou `p < 10^-300`, medianas de **154 vs. 102 caracteres** e probabilidade de superioridade de **0,6771**. É uma análise exploratória e observacional, não causal.
+- **Baseline de intenção:** TF-IDF + regressão logística obteve **Macro F1 de 0,9887** no teste interno isolado do Bitext. O número **não** é desempenho em português e o modelo **não** está ligado a `/predictions/predict`. Consulte o [relatório](reports/bitext_intent_model/relatorio.md) e os [erros](reports/bitext_intent_model/erros.md).
+- **Revisão humana:** 500 rótulos finais, sendo 375 por concordância dupla e 125 por adjudicação; 78 casos marcados incertos ficam fora da avaliação principal, restando 422 elegíveis. Concordância simples de 75,00% e kappa de Cohen de 0,5504. As 500 anotações contêm 20 das 46 intenções, mas as 422 elegíveis contêm apenas 14; 292 delas são `submit_product_feedback`. Há 84 decisões adjudicadas sem justificativa textual recuperável. Veja [protocolo](docs/ptbr_intent_validation_protocol.md), [metodologia](reports/data_methodology/relatorio.md) e [relatório final](reports/ptbr_intent_validation/final_relatorio.md).
+
+## TP3 — parte de dados
+
+O [mapa de evidências da entrega](reports/tp3_data/entrega_tp3_dados.md) liga os requisitos de dados do TP3 aos notebooks, relatórios e limites metodológicos. A frente de API, CI/CD, auditoria e definição do alvo adversário permanece separada.
+
+O [notebook de regressão linear múltipla](notebooks/07_tp3_regressao_linear.ipynb) usa apenas características da solicitação Bitext para prever o comprimento numérico da resposta de referência. No teste reservado, obteve **R² 0,0080** e **RMSE 308,82 caracteres**, contra **310,10** ao prever a média do treino. A melhora de RMSE é de apenas **0,41%**: a regressão cumpre o exercício diagnóstico, mas explica muito pouco do alvo e **não é um classificador de intenção**. Veja [resultados, resíduos e Q-Q plot](reports/tp3_data/regressao_linear.md).
+
+A [pergunta de classificação](reports/tp3_data/pergunta_classificacao.md) documenta as 46 intenções e sua distribuição. A [avaliação externa PT-BR](reports/tp3_data/avaliacao_externa_ptbr.md) aplicou o baseline inglês congelado, sem retreinamento, aos 422 feedbacks elegíveis: **acurácia 0,0142 e Macro-F1 0,0108 nas 14 intenções com suporte**, contra acurácia 0,6919 da referência majoritária. Em 125 textos, o TF-IDF gerou vetor vazio. O resultado evidencia forte falha de transferência entre o Bitext inglês e reviews reais em português; **não justifica integrar o modelo à API**. O [plano técnico de dados para T2](reports/tp3_data/plano_t2_dados.md) delimita as próximas decisões sem reutilizar a amostra externa para ajuste. A identificação do colega adversário e a URL da API-alvo dependem de confirmação da equipe; esta frente de dados **não** substitui a auditoria de segurança nem o PDF consolidado do TP3.
+
+Um [teste adicional com embeddings multilíngues](reports/tp3_data/transferencia_multilingue.md), escolhido somente pela validação Bitext, acertou **38/422 (9,0%)**, ainda abaixo da meta de 60% e da referência majoritária. Como o teste PT-BR já havia sido visto no baseline anterior, trata-se de diagnóstico exploratório, não de confirmação externa independente. O [plano para melhorar a classificação](reports/tp3_data/plano_melhoria_intencoes_ptbr.md) explica a incompatibilidade entre perguntas de suporte e avaliações já escritas, e define coleta/anotação de solicitações reais com um novo teste reservado.
+
+Para reproduzir o notebook após `python scripts/build_bitext_intent_dataset.py`, execute `jupyter notebook` na raiz do projeto e abra `notebooks/07_tp3_regressao_linear.ipynb`. A execução gera `reports/tp3_data/regressao_linear_resultados.json` e as duas figuras de diagnóstico.
+
+Para reproduzir a avaliação externa, execute `python scripts/rebuild_ptbr_validation_dataset.py`, `python scripts/train_bitext_intent_baseline.py` e `python scripts/evaluate_ptbr_external.py`, nesta ordem. O primeiro script verifica os hashes da fonte B2W e dos rótulos humanos; o último apenas carrega o modelo já treinado, verifica a separação do teste e gera os resultados em `reports/tp3_data/`. A [pergunta de classificação em PDF](output/pdf/tp3_pergunta_classificacao.pdf) tem uma página e pode ser regenerada com `python scripts/build_tp3_classification_pdf.py`. O modelo e os CSVs derivados ficam locais e não são versionados.
+
+O experimento multilíngue é reproduzido com `python scripts/evaluate_multilingual_transfer.py` após preparar os dois datasets. Ele baixa cerca de 220 MB de pesos ONNX para `.cache/`, verifica a revisão fixada, seleciona `C` apenas na validação Bitext e só então consulta o teste PT-BR. Requer `fastembed==0.9.0` de `requirements-data.txt`.
+
+Para o passo seguinte, um [piloto com reclamações reais ConsumerBR](docs/consumerbr_pilot_annotation_protocol.md) separou 240 textos para dupla anotação e 80 textos reservados, ainda sem rótulos. O [manifesto](reports/tp3_data/consumerbr_pilot_manifest.json) publica somente proveniência, seleção e hashes; textos e planilhas ficam em `outputs/tp3-consumerbr/`, fora do Git. O piloto foi consolidado após dupla revisão e adjudicação: 73 casos por concordância clara e 167 por decisão humana justificada. O [resumo sem textos](reports/tp3_data/consumerbr_human_labels.md) registra que os 240 rótulos finais cobrem apenas 20 classes; portanto, o conjunto serve para experimento de desenvolvimento, não para alegar cobertura das 46 intenções ou meta de 60%. `python scripts/prepare_consumerbr_pilot.py` reproduz a amostra por leitura remota do ZIP; `python scripts/consolidate_consumerbr_human_labels.py` consolida as anotações privadas já validadas. Os 80 casos reservados permanecem sem rótulo e não podem ser usados para seleção de modelo.
+
+## Testes e OWASP ZAP
+
+Após instalar as dependências da API, execute:
+
+```bash
+python -m pytest tests/ -q
+```
+
+A última verificação passou com **33 testes**, incluindo acesso sem token, tentativa de leitura de recurso alheio, rejeição de campo extra, limites de login, cabeçalhos, CSP estrita e validações do pipeline de dados. Os testes de API usam SQLite em memória; uma validação separada com **PostgreSQL 16.15** confirmou persistência após reinício e respostas **403/200/401** para outro usuário/dono/sem token. A suíte automatizada não substitui testes de integração completos com PostgreSQL.
+
+O scan passivo **real** do OWASP ZAP 2.17.0 do TP2 está em [HTML](reports/zap_report.html), [JSON](reports/zap_report.json) e [triagem explicada](reports/relatorio_owasp_zap.md). Ele registrou um Medium histórico de CSP em `/docs`. Para o TP3, a política de `/docs` passou a usar somente `style-src 'self'`; a interface Swagger foi verificada em navegador e há teste automatizado que rejeita `unsafe-inline`. O caminho legado `/redoc` redireciona para `/docs`, pois o ReDoc exige estilos inline. Um novo scan ZAP deve ser anexado antes da entrega final para atualizar a evidência exportada. O scan passivo não prova ausência de BOLA/IDOR ou de vulnerabilidades exploráveis; os testes de autorização constituem evidência separada.
+
+Para repetir uma varredura de leitura em uma API local com ZAP portátil:
+
+```bash
+python scripts/run_owasp_zap_scan.py --zap-home /caminho/ZAP_2.17.0 --target http://127.0.0.1:8000
+```
+
+A opção `--import-openapi` aumenta a cobertura, mas **pode enviar POSTs**: use-a somente em banco descartável. Sem `--zap-home`, o script usa a imagem Docker do ZAP; consulte o [procedimento](reports/relatorio_owasp_zap.md). O scan foi passivo e não autenticado, não um pentest completo.
+
+## Entrega, limitações e próximos passos
+
+Para o TP2, envie:
+
+1. O [PDF final](output/pdf/nathalia_artigas_PB_TP2.PDF), nomeado `nathalia_artigas_PB_TP2.PDF`, com **Nathalia Calazans Artigas e Daniel Augusto da Silva** identificados como autores.
+2. O [link do repositório na `main`](https://github.com/danielssaugusto/ecomshield-platform/tree/main).
+3. O [relatório exportado pelo ZAP](reports/zap_report.html) e, para facilitar a correção, o [documento de findings](reports/relatorio_owasp_zap.md).
+
+O PDF pode ser regenerado a partir dos relatórios e figuras versionados com `python -m pip install reportlab` e `python scripts/build_tp2_submission_pdf.py`. O gerador usa Arial no macOS ou DejaVu Sans no Linux. A entrega no portal da disciplina deve ser feita pelos autores; publicar no GitHub não a substitui.
+
+**Limitações que não devem ser omitidas:** o Bitext não demonstra desempenho em PT-BR; o B2W não possui intenção nativa; 78 rótulos humanos permanecem incertos; o endpoint de predição é *placeholder*; o rate limiting não é distribuído; `order_id` não é verificado contra pedidos reais; e o Compose expõe HTTP local sem configurar TLS. Antes de uso público, é preciso validar o modelo em dados apropriados, completar o domínio de pedidos, revisar segurança de produção e executar um novo scan ZAP contra a versão com CSP estrita.
+
+O código do repositório possui [licença MIT](LICENSE); os datasets têm licenças próprias, indicadas acima, que devem ser respeitadas independentemente da licença do código.

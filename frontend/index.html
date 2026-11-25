@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-ComShield</title>
+<style>
+:root{--bg:#eef1f5;--pn:#fff;--ln:#d9dfe8;--tx:#16213a;--mu:#65708a;--ac:#0f6f66;--acx:#fff;--ok:#0f6f66;--wn:#a35a00;--bd:#b42318;--in:#eef1f5;--r:6px}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1524;--pn:#151f33;--ln:#26324d;--tx:#e8edf8;--mu:#93a0bf;--ac:#3fbfae;--acx:#06201c;--ok:#3fbfae;--wn:#e8a94a;--bd:#ff7b72;--in:#0e1524}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--pn);border-right:1px solid var(--ln);padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:18px;padding:0 8px 18px}
+.brand svg{width:28px;height:28px;color:var(--ac)}
+nav button{all:unset;cursor:pointer;display:block;width:100%;padding:9px 10px;border-radius:var(--r);color:var(--mu);box-sizing:border-box}
+nav button:hover{background:var(--in)}
+nav button[aria-current=true]{background:var(--in);color:var(--tx);font-weight:600;box-shadow:inset 3px 0 0 var(--ac)}
+.who{margin-top:auto;padding:12px 8px 0;border-top:1px solid var(--ln);font-size:13px;color:var(--mu)}
+.who b{display:block;color:var(--tx);font-size:14px;overflow:hidden;text-overflow:ellipsis}
+main{padding:28px clamp(16px,4vw,44px);min-width:0}
+h1{font-size:24px;margin:0 0 4px}
+.sub{color:var(--mu);margin:0 0 22px;max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:28px;align-items:start}
+.panel{background:var(--pn);border:1px solid var(--ln);border-radius:var(--r);padding:18px}
+.panel h2{font-size:16px;margin:0 0 14px}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:12px}
+label input:not([type=checkbox]),label select,label textarea{display:block;width:100%;margin-top:4px;padding:8px 10px;background:var(--in);border:1px solid var(--ln);border-radius:var(--r);color:var(--tx)}
+label textarea{min-height:90px;resize:vertical}
+label small{display:block;margin-top:3px}
+.btn{cursor:pointer;border:1px solid var(--ac);background:var(--ac);color:var(--acx);padding:8px 14px;border-radius:var(--r);font-weight:600}
+.btn.ghost{background:none;color:var(--tx);border-color:var(--ln);font-weight:500}
+.btn:disabled{opacity:.55;cursor:wait}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--mu);font-size:13px;padding:8px 12px;border-bottom:1px solid var(--ln);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--ln);vertical-align:top;max-width:340px;overflow-wrap:anywhere}
+tr:last-child td{border-bottom:0}
+.badge{display:inline-block;padding:1px 9px;border-radius:99px;border:1px solid currentColor;font-size:12.5px;font-weight:600}
+.b-ok{color:var(--ok)}.b-wn{color:var(--wn)}.b-bd{color:var(--bd)}.b-mu{color:var(--mu)}
+.empty{padding:28px 8px;color:var(--mu);text-align:center}
+.note{border-left:3px solid var(--wn);padding:6px 12px;margin:0 0 18px;color:var(--mu);font-size:13.5px}
+.res{margin-top:14px;background:var(--in);border:1px solid var(--ln);border-radius:var(--r);padding:10px;font:12.5px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.pill{font-size:12.5px;color:var(--mu);display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mu)}
+.dot.on{background:var(--ok)}.dot.off{background:var(--bd)}
+.auth{max-width:400px;margin:9vh auto;padding:0 16px}
+.auth .brand{justify-content:center;font-size:22px;padding-bottom:6px}
+.tabs{display:flex;gap:4px;margin-bottom:14px}
+.tabs .btn{flex:1}
+.tabs .btn:not(.on){background:none;color:var(--mu);border-color:var(--ln)}
+.cfg{display:flex;gap:6px;margin-top:14px}
+.cfg input{flex:1;padding:6px 8px;background:var(--in);border:1px solid var(--ln);border-radius:var(--r);font-size:13px}
+.err{color:var(--bd);font-size:13.5px;min-height:20px;margin:0 0 10px}
+.ok{color:var(--ok)}
+dialog{border:1px solid var(--ln);background:var(--pn);color:var(--tx);border-radius:var(--r);padding:20px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(5,10,20,.55)}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+@media(max-width:820px){.shell{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--ln)}.brand{padding:0 8px 0 0}.who{margin:0 0 0 auto;border:0;padding:0}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const S={base:localStorage.getItem('ecs_base')||'http://127.0.0.1:8000',token:sessionStorage.getItem('ecs_t')||'',me:null,spec:null,up:null,tab:'reviews',mode:'login',data:[],result:null,err:''};
+const SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>';
+const TABS={
+ reviews:{t:'Avaliações',d:'Feedbacks de clientes vinculados à sua conta.',list:'/reviews/',create:{p:'/reviews/',t:'Nova avaliação',btn:'Enviar avaliação'}},
+ predictions:{t:'Predições',d:'Consultas de intenção registradas pela API.',list:'/predictions/',create:{p:'/predictions/predict',t:'Nova predição',btn:'Registrar predição'},note:'O endpoint de predição ainda grava uma resposta placeholder: o classificador não está integrado à API.'},
+ refunds:{t:'Reembolsos',d:'Solicitações de reembolso e o andamento de cada uma.',list:'/refunds/',create:{p:'/refunds/',t:'Solicitar reembolso',btn:'Solicitar reembolso'},edit:'/refunds/{id}'},
+ users:{t:'Usuários',d:'Contas cadastradas. Disponível para administradores.',list:'/users/',admin:true}
+};
+
+async function api(path,{method='GET',json,form}={}){
+ const h={};if(S.token)h.Authorization='Bearer '+S.token;
+ let body;if(json){h['Content-Type']='application/json';body=JSON.stringify(json)}if(form)body=new URLSearchParams(form);
+ let r;try{r=await fetch(S.base+path,{method,headers:h,body})}catch(e){throw new Error('Não foi possível conectar à API. Confira a URL e se o endereço desta página está em ALLOWED_ORIGINS.')}
+ const t=await r.text();let d;try{d=JSON.parse(t)}catch{d=t}
+ if(r.status===429)throw new Error('Muitas tentativas de login. Aguarde '+(r.headers.get('Retry-After')||'60')+' segundos.');
+ if(r.status===401&&S.token&&path!=='/auth/token'){logout();throw new Error('Sua sessão expirou. Entre novamente.')}
+ if(!r.ok){const m=d&&d.detail;throw new Error(typeof m==='string'?m:Array.isArray(m)?m.map(x=>(x.loc||[]).slice(1).join('.')+': '+x.msg).join('; '):'Erro '+r.status)}
+ return d}
+
+const deref=s=>{if(!s)return{};if(s.$ref)return deref(S.spec.components.schemas[s.$ref.split('/').pop()]);const a=s.anyOf||s.oneOf;if(a)return deref(a.find(x=>x.type!=='null')||a[0]);return s};
+const bodySchema=(p,m)=>{const c=S.spec&&S.spec.paths&&S.spec.paths[p]&&S.spec.paths[p][m]&&S.spec.paths[p][m].requestBody;return c&&c.content&&c.content['application/json']?deref(c.content['application/json'].schema):null};
+
+function fields(sc){
+ const req=sc.required||[];
+ return Object.entries(sc.properties||{}).map(([k,p])=>{
+  const d=deref(p),r=req.includes(k),n=esc(k);
+  const lab=esc(p.title||d.title||k)+(r?' *':'');
+  let i;
+  if(d.enum)i=`<select name="${n}">${(r?'':'<option value=""></option>')+d.enum.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`;
+  else if(d.type==='boolean')i=`<input type="checkbox" name="${n}" data-t="b" style="margin-left:6px">`;
+  else if(d.type==='integer'||d.type==='number')i=`<input type="number" name="${n}" data-t="n" step="${d.type==='integer'?1:'any'}" ${r?'required':''} ${d.minimum!=null?`min="${d.minimum}"`:''} ${d.maximum!=null?`max="${d.maximum}"`:''}>`;
+  else if(/pass|senha/i.test(k))i=`<input type="password" name="${n}" autocomplete="new-password" ${r?'required':''} ${d.minLength?`minlength="${d.minLength}"`:''}>`;
+  else if(/text|comment|message|description|reason|body|content|note|motivo/i.test(k)||d.maxLength>200)i=`<textarea name="${n}" ${r?'required':''} ${d.maxLength?`maxlength="${d.maxLength}"`:''}></textarea>`;
+  else i=`<input name="${n}" ${r?'required':''} ${d.minLength?`minlength="${d.minLength}"`:''} ${d.maxLength?`maxlength="${d.maxLength}"`:''}>`;
+  return `<label>${lab}${i}${d.description?`<small>${esc(d.description)}</small>`:''}</label>`}).join('')}
+function collect(f){const o={};f.querySelectorAll('[name]').forEach(e=>{const t=e.dataset.t;if(t==='b')o[e.name]=e.checked;else if(e.value!=='')o[e.name]=t==='n'?Number(e.value):e.value});return o}
+const admin=()=>!!S.me&&((S.me.role===undefined&&S.me.is_admin===undefined)||String(S.me.role).toLowerCase()==='admin'||S.me.is_admin===true);
+
+function cell(k,v){
+ if(v===null||v===undefined||v==='')return '<span class="b-mu">—</span>';
+ if(typeof v==='object')return esc(JSON.stringify(v));
+ if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(v)){const d=new Date(v);if(!isNaN(d))return esc(d.toLocaleString('pt-BR'))}
+ if(typeof v==='boolean')return `<span class="badge ${v?'b-ok':'b-mu'}">${v?'sim':'não'}</span>`;
+ if(/status|role|label|intent|category|sentiment/i.test(k)){const s=String(v).toLowerCase();const c=/approv|aprov|ok|done|admin|active|resolv|positiv/.test(s)?'b-ok':/reject|neg|den|recus|fail/.test(s)?'b-bd':/pend|open|review|analis|wait/.test(s)?'b-wn':'b-mu';return `<span class="badge ${c}">${esc(v)}</span>`}
+ return esc(v)}
+function table(rows,t){
+ if(!Array.isArray(rows)||!rows.length)return '<div class="empty">Nada por aqui ainda. Use o formulário para criar o primeiro registro.</div>';
+ const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))].filter(c=>!/hash|password/i.test(c));
+ const ed=t.edit&&admin();
+ return `<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}${ed?'<th></th>':''}</tr></thead><tbody>${rows.map((r,i)=>`<tr>${cols.map(c=>`<td>${cell(c,r[c])}</td>`).join('')}${ed?`<td><button class="btn ghost" data-edit="${i}">Atualizar</button></td>`:''}</tr>`).join('')}</tbody></table></div>`}
+
+function cfg(){return `<div class="cfg"><input id="base" value="${esc(S.base)}" aria-label="URL da API"><button class="btn ghost" id="apply" type="button">Aplicar</button></div>`}
+async function boot(){
+ try{S.spec=await api('/openapi.json');await api('/health');S.up=true}catch(e){S.up=false}
+ if(S.token){try{S.me=await api('/users/me')}catch(e){S.token='';sessionStorage.removeItem('ecs_t')}}
+ render()}
+function bindCfg(){const a=$('#apply');if(a)a.onclick=()=>{S.base=$('#base').value.trim().replace(/\/$/,'');localStorage.setItem('ecs_base',S.base);boot()}}
+function logout(){S.token='';S.me=null;sessionStorage.removeItem('ecs_t');render()}
+
+function render(){S.me?renderMain():renderAuth()}
+function renderAuth(){
+ const reg=S.mode==='register',sc=reg&&bodySchema('/auth/register','post');
+ const form=reg?(sc&&sc.properties?fields(sc):'<label>Usuário<input name="username" required></label><label>Senha<input type="password" name="password" required></label>'):'<label>Usuário<input name="username" required autocomplete="username"></label><label>Senha<input type="password" name="password" required autocomplete="current-password"></label>';
+ $('#app').innerHTML=`<div class="auth"><div class="brand">${SHIELD}E-ComShield</div><p class="sub" style="text-align:center;margin:0 auto 18px">Reembolsos, avaliações e predições com acesso controlado por papel.</p>
+ <div class="panel"><div class="tabs"><button class="btn ${reg?'':'on'}" data-m="login">Entrar</button><button class="btn ${reg?'on':''}" data-m="register">Criar conta</button></div>
+ <form id="af">${form}<p class="err" id="err">${esc(S.err)}</p><button class="btn" style="width:100%">${reg?'Criar conta':'Entrar'}</button></form>
+ ${cfg()}<p class="pill" style="margin:10px 0 0"><span class="dot ${S.up?'on':'off'}"></span>${S.up?'API conectada':'API indisponível'}</p></div></div>`;
+ bindCfg();
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;S.err='';render()});
+ $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.btn');btn.disabled=true;
+  try{const v=collect(f);
+   if(reg){await api('/auth/register',{method:'POST',json:v});S.mode='login';S.err='';render();$('#err').innerHTML='<span class="ok">Conta criada. Agora é só entrar.</span>'}
+   else{const d=await api('/auth/token',{method:'POST',form:{username:v.username,password:v.password}});S.token=d.access_token;sessionStorage.setItem('ecs_t',S.token);S.me=await api('/users/me');S.err='';S.tab='reviews';render()}
+  }catch(x){S.err=x.message;$('#err').textContent=x.message;btn.disabled=false}}}
+
+async function load(){const t=TABS[S.tab];try{S.data=await api(t.list)}catch(e){S.data=[];S.err=e.message}paint()}
+function renderMain(){
+ $('#app').innerHTML=`<div class="shell"><aside><div class="brand">${SHIELD}E-ComShield</div><nav>${Object.entries(TABS).filter(([k,t])=>!t.admin||admin()).map(([k,t])=>`<button data-t="${k}" aria-current="${k===S.tab}">${t.t}</button>`).join('')}</nav>
+ <div class="who"><b>${esc(S.me.username||S.me.email||'Conta')}</b>${esc(S.me.role||'')}<br><span class="pill"><span class="dot ${S.up?'on':'off'}"></span>${esc(S.base)}</span><br><button class="btn ghost" id="out" style="margin-top:10px;width:100%">Sair</button></div></aside><main id="mn"></main></div>`;
+ $('#out').onclick=logout;
+ document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;S.result=null;S.err='';renderMain();load()});
+ paint()}
+function paint(){
+ const t=TABS[S.tab],c=t.create,sc=c&&bodySchema(c.p,'post');
+ $('#mn').innerHTML=`<h1>${t.t}</h1><p class="sub">${t.d}</p>${t.note?`<p class="note">${t.note}</p>`:''}${S.err?`<p class="err">${esc(S.err)}</p>`:''}
+ <div class="${c?'grid':''}">${c?`<section class="panel"><h2>${c.t}</h2>${sc?`<form id="cf">${fields(sc)}<p class="err" id="cerr"></p><button class="btn">${c.btn}</button></form>`:'<p class="sub">Não encontrei o formato deste formulário no /openapi.json da API.</p>'}${S.result?`<div class="res">${esc(JSON.stringify(S.result,null,2))}</div>`:''}</section>`:''}
+ <section class="panel"><div class="tablewrap">${table(S.data,t)}</div></section></div>`;
+ const f=$('#cf');
+ if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('.btn');b.disabled=true;
+  try{S.result=await api(c.p,{method:'POST',json:collect(f)});S.err='';await load()}catch(x){$('#cerr').textContent=x.message;b.disabled=false}};
+ document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(S.data[+b.dataset.edit]))}
+function edit(row){
+ const sc=bodySchema(TABS[S.tab].edit,'patch'),d=$('#dlg');
+ d.innerHTML=`<h2 style="margin-top:0;font-size:17px">Atualizar reembolso ${esc(row.id)}</h2>${sc?`<form id="ef">${fields(sc)}<p class="err" id="eerr"></p><div class="row"><button type="button" class="btn ghost" id="cx">Cancelar</button><button class="btn">Salvar alterações</button></div></form>`:'<p>Formato de atualização não encontrado no /openapi.json.</p>'}`;
+ d.showModal();$('#cx')&&($('#cx').onclick=()=>d.close());
+ const f=$('#ef');if(f)f.querySelectorAll('[name]').forEach(e=>{if(row[e.name]!=null){if(e.dataset.t==='b')e.checked=!!row[e.name];else e.value=row[e.name]}});
+ if(f)f.onsubmit=async ev=>{ev.preventDefault();try{await api(TABS[S.tab].edit.replace('{id}',row.id),{method:'PATCH',json:collect(f)});d.close();load()}catch(x){$('#eerr').textContent=x.message}}}
+
+boot().then(()=>{if(S.me)load()});
+</script>
+</body>
+</html>
