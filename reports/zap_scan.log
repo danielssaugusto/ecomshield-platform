@@ -1,0 +1,59 @@
+Found Java version 21.0.6
+Available memory: 8192 MB
+Using JVM args: -Xmx2048m
+597 [main] INFO  org.parosproxy.paros.Constant - Copying default configuration to /var/folders/jc/cv3hf9w534d9rw3hzkw2nrh00000gn/T/ecomshield-zap-buuci1v7/home/config.xml
+751 [main] INFO  org.parosproxy.paros.Constant - Creating directory /var/folders/jc/cv3hf9w534d9rw3hzkw2nrh00000gn/T/ecomshield-zap-buuci1v7/home/session
+752 [main] INFO  org.parosproxy.paros.Constant - Creating directory /var/folders/jc/cv3hf9w534d9rw3hzkw2nrh00000gn/T/ecomshield-zap-buuci1v7/home/dirbuster
+752 [main] INFO  org.parosproxy.paros.Constant - Creating directory /var/folders/jc/cv3hf9w534d9rw3hzkw2nrh00000gn/T/ecomshield-zap-buuci1v7/home/fuzzers
+752 [main] INFO  org.parosproxy.paros.Constant - Creating directory /var/folders/jc/cv3hf9w534d9rw3hzkw2nrh00000gn/T/ecomshield-zap-buuci1v7/home/plugin
+No check for updates for over 3 month - add-ons may well be out of date
+Job requestor set url = http://127.0.0.1:8000/health
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/openapi.json
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/docs
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/redoc
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/static/swagger-ui-bundle.js
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/static/swagger-ui.css
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/static/redoc.standalone.js
+Job requestor set responseCode = 200
+Job requestor set url = http://127.0.0.1:8000/users/me
+Job requestor set responseCode = 401
+Job openapi set apiUrl = http://127.0.0.1:8000/openapi.json
+Job openapi set targetUrl = http://127.0.0.1:8000
+Job openapi set context = EcomShield
+Job passiveScan-wait set maxDuration = 5
+Job report set template = traditional-html
+Job report set reportDir = /Users/nathaliaartigas/.codex/worktrees/integracao-tp2/ecomshield-platform/reports
+Job report set reportFile = zap_report.html
+Job report set reportTitle = EcomShield TP2 - ZAP Passive Scan
+Job report set template = traditional-json
+Job report set reportDir = /Users/nathaliaartigas/.codex/worktrees/integracao-tp2/ecomshield-platform/reports
+Job report set reportFile = zap_report.json
+Job report set reportTitle = EcomShield TP2 - ZAP Passive Scan
+Job requestor started
+Job requestor requesting URL http://127.0.0.1:8000/health
+Job requestor requesting URL http://127.0.0.1:8000/openapi.json
+Job requestor requesting URL http://127.0.0.1:8000/docs
+Job requestor requesting URL http://127.0.0.1:8000/redoc
+Job requestor requesting URL http://127.0.0.1:8000/static/swagger-ui-bundle.js
+Job requestor requesting URL http://127.0.0.1:8000/static/swagger-ui.css
+Job requestor requesting URL http://127.0.0.1:8000/static/redoc.standalone.js
+Job requestor requesting URL http://127.0.0.1:8000/users/me
+Job requestor finished, time taken: 00:00:00
+Job openapi started
+Job openapi added 17 URLs
+Job openapi finished, time taken: 00:00:00
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:07
+Job report started
+Job report generated report /Users/nathaliaartigas/.codex/worktrees/integracao-tp2/ecomshield-platform/reports/zap_report.html
+Job report finished, time taken: 00:00:00
+Job report started
+Job report generated report /Users/nathaliaartigas/.codex/worktrees/integracao-tp2/ecomshield-platform/reports/zap_report.json
+Job report finished, time taken: 00:00:00
+Automation plan succeeded!

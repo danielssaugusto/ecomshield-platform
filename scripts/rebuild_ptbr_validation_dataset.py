@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Rebuild the PT-BR validation dataset from B2W and versioned human labels."""
 from __future__ import annotations
 
@@ -8,7 +7,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-
 from create_ptbr_validation_queue import select_sample, stable_id
 from download_b2w_reviews import DEFAULT_PATH, ensure_b2w_source
 
@@ -90,9 +88,13 @@ O arquivo final preserva as duas opiniões, a decisão de adjudicação quando
 necessária e o método que originou cada rótulo validado.
 
 Os registros com `has_uncertainty_flag=true` são preservados para auditoria,
-mas ficam fora da métrica principal. O conjunto usa {final['validated_intent'].nunique()}
-das 46 intenções da taxonomia. A amostra foi estratificada por nota e não
-representa a distribuição operacional de chamados de atendimento.
+mas ficam fora da métrica principal. Os 500 registros usam
+{final['validated_intent'].nunique()} das 46 intenções da taxonomia; os
+{int(final['evaluation_eligible'].sum())} elegíveis usam apenas {final.loc[final['evaluation_eligible'], 'validated_intent'].nunique()}.
+A classe mais frequente entre os elegíveis é
+`{final.loc[final['evaluation_eligible'], 'validated_intent'].value_counts().index[0]}` ({int(final.loc[final['evaluation_eligible'], 'validated_intent'].value_counts().iloc[0])} registros).
+A amostra foi estratificada por nota e não representa a distribuição
+operacional de chamados de atendimento.
 """, encoding="utf-8")
     print(f"Dataset PT-BR reconstruído: {args.output} ({len(final)} registros)")
 

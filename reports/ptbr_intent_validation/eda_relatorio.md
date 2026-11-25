@@ -15,16 +15,18 @@ Bitext. Essa separação preserva a validade da comparação futura.
 - Rótulos por adjudicação: 125
 - Registros com incerteza: 78
 - Registros elegíveis para métrica principal: 422
+- Intenções com suporte entre elegíveis: 14 de 46
 
 ## Interpretação responsável
 
 A distribuição é concentrada: `submit_product_feedback` representa
-59.00% do conjunto.
-Entre os dados elegíveis, 5 intenções têm menos de cinco exemplos. Por
-isso, uma futura avaliação deve divulgar suporte por intenção e não apresentar
-Macro F1 isoladamente como resultado conclusivo. O baseline atual é em inglês;
-não se calcula desempenho dele neste conjunto PT-BR sem uma estratégia
-linguística declarada e testada.
+59.00% dos 500 registros e
+69.19% dos elegíveis.
+Entre os dados elegíveis, 5 intenções têm menos de cinco exemplos. O
+resultado externo do baseline inglês está no
+[relatório TP3](../tp3_data/avaliacao_externa_ptbr.md).
+Sua interpretação exige suporte por intenção, comparação com a classe
+majoritária e análise dos erros; Macro-F1 isolado não é conclusivo.
 
 ## Figuras
 
