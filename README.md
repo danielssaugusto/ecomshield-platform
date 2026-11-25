@@ -1,15 +1,19 @@
 # E-ComShield
 
-Projeto acadêmico de análise de feedback e intenções em e-commerce, com API FastAPI e verificações de segurança para o TP2.
+Projeto acadêmico de análise de feedback e intenções em e-commerce, com API FastAPI, frontend web integrado e verificações de segurança.
 
 **Autores:** Nathalia Calazans Artigas e Daniel Augusto da Silva.
+
+**API em produção:** <https://ecomshield-platform.onrender.com>
 
 > O projeto separa a análise de dados da aplicação. O B2W-Reviews01 contém avaliações reais em português, mas não traz intenção de atendimento anotada. O Bitext traz rótulos de intenção publicados pela fonte, porém é um corpus em inglês e híbrido/sintético. A API ainda **não** usa o classificador: `/predictions/predict` grava uma resposta *placeholder*.
 
 ## Índice
 
 - [O que foi entregue](#o-que-foi-entregue)
+- [Frontend web](#frontend-web)
 - [Início rápido da API com Docker Compose](#início-rápido-da-api-com-docker-compose)
+- [Deploy no Render](#deploy-no-render)
 - [Execução local da API](#execução-local-da-api)
 - [Rotas e controles de segurança](#rotas-e-controles-de-segurança)
 - [Reproduzir a parte de dados](#reproduzir-a-parte-de-dados)
@@ -25,6 +29,7 @@ Projeto acadêmico de análise de feedback e intenções em e-commerce, com API 
 | Classificação exploratória | [Baseline Bitext](reports/bitext_intent_model/relatorio.md) e [análise de erros](reports/bitext_intent_model/erros.md); **não integrado à API** |
 | Revisão humana PT-BR | [Metodologia](reports/data_methodology/relatorio.md), [protocolo](docs/ptbr_intent_validation_protocol.md) e [relatório final](reports/ptbr_intent_validation/final_relatorio.md) |
 | API e segurança | [Código FastAPI](src/main.py), [DFD](DFD.md), [testes](tests/test_security.py) e [triagem do ZAP](reports/relatorio_owasp_zap.md) |
+| Frontend web | [`frontend/index.html`](frontend/index.html) — servido pela própria API em `/` |
 | Entrega acadêmica | [PDF do TP2](output/pdf/nathalia_artigas_PB_TP2.PDF) |
 
 Os notebooks `01_data_cleaning.ipynb` e `02_eda.ipynb` documentam a exploração inicial do TP1. Para os resultados atuais do TP2, use os notebooks `03` a `06` e os relatórios vinculados acima.
@@ -34,11 +39,43 @@ Os notebooks `01_data_cleaning.ipynb` e `02_eda.ipynb` documentam a exploração
 | Caminho | Conteúdo |
 | --- | --- |
 | `src/app/routers/`, `src/app/models.py`, `src/app/database.py` | Rotas, schemas/tabelas SQLModel e acesso ao banco |
+| `frontend/index.html` | Interface web servida na raiz da API (`GET /`) |
 | `scripts/` | Download verificado, preparação dos dados, baseline, relatórios, ZAP e geração do PDF |
 | `notebooks/` | EDA, avaliação do baseline e análise descritiva da amostra humana |
 | `data/annotations/` | Decisões humanas e manifesto de proveniência, sem textos brutos das avaliações |
 | `reports/` | Relatórios, figuras, resultados do ZAP e limitações |
 | `output/pdf/` | PDF final do TP2 |
+
+## Frontend web
+
+A interface web está em [`frontend/index.html`](frontend/index.html) e é servida diretamente pela API na rota `GET /`. Não é necessário hospedar o frontend em um serviço separado.
+
+**Acesso em produção:** <https://ecomshield-platform.onrender.com>
+
+Funcionalidades:
+- Login e cadastro de usuário com JWT
+- Visualização e criação de avaliações, predições e reembolsos
+- Painel de usuários (exclusivo para administradores)
+- Indicador de status da API e campo para trocar a URL-alvo (botão **Aplicar**)
+
+### Botão "Aplicar"
+
+O campo de URL e o botão **Aplicar** (visível na tela de login) permitem apontar o frontend para uma instância diferente da API — por exemplo, `http://localhost:8000` durante o desenvolvimento local. O valor é salvo no `localStorage` do navegador. Por padrão, o frontend usa `window.location.origin`, ou seja, a mesma origem de onde foi carregado.
+
+### Usuário administrador
+
+O usuário `admin` é criado automaticamente no primeiro boot **somente se** a variável de ambiente `ADMIN_BOOTSTRAP_PASSWORD` estiver configurada. Ele não é criado novamente se já existir. Faça login com:
+
+| Campo | Valor |
+|---|---|
+| **Usuário** | `admin` |
+| **Senha** | valor de `ADMIN_BOOTSTRAP_PASSWORD` |
+
+Qualquer outro usuário pode ser criado pelo botão **"Criar conta"** na tela de login ou via `POST /auth/register`. Usuários comuns têm papel `viewer` e não enxergam a aba "Usuários".
+
+### Segurança do frontend
+
+A rota `/` calcula o hash SHA-256 do `<script>` inline do `index.html` e injeta o valor no cabeçalho `Content-Security-Policy` (`script-src 'self' 'sha256-...'`). Isso preserva a política estrita sem exigir `unsafe-inline` e é reavaliado a cada request, portanto qualquer alteração no script é refletida automaticamente.
 
 ## Início rápido da API com Docker Compose
 
@@ -70,12 +107,32 @@ docker compose down
 
 `docker compose down` mantém o volume `pgdata`. **Não** acrescente `-v` se quiser preservar o banco. O esquema é criado na inicialização via SQLModel; o projeto não dispõe de migrações de banco. Em um banco criado por versões antigas, uma conta `admin` existente pode conservar senha antiga: revise-a antes de expor a API.
 
+- Frontend: <http://127.0.0.1:8000/>
 - Saúde: <http://127.0.0.1:8000/health>
 - Swagger UI: <http://127.0.0.1:8000/docs>
 - ReDoc: <http://127.0.0.1:8000/redoc>
 - OpenAPI: <http://127.0.0.1:8000/openapi.json>
 
 As interfaces Swagger/ReDoc usam recursos estáticos locais, com origem, licença e hashes descritos em [`src/app/static/THIRD_PARTY.md`](src/app/static/THIRD_PARTY.md).
+
+## Deploy no Render
+
+A API está hospedada no [Render](https://render.com) como um **Web Service** com deploy automático a partir do GitHub. O `Dockerfile` na raiz do repositório é usado como base da imagem.
+
+### Variáveis de ambiente obrigatórias no Render
+
+Acesse **Dashboard → seu serviço → Environment → Add Environment Variable** e configure:
+
+| Variável | Descrição |
+|---|---|
+| `DATABASE_URL` | URL do PostgreSQL (ex.: instância Render Postgres) |
+| `SECRET_KEY` | Chave JWT persistente — gere com `python3 -c "import secrets; print(secrets.token_urlsafe(48))"` |
+| `ADMIN_BOOTSTRAP_PASSWORD` | Senha do usuário `admin`; criado apenas no primeiro boot se não existir |
+| `ALLOWED_ORIGINS` | *(opcional)* origens extras além de `https://ecomshield-platform.onrender.com` |
+
+> **Atenção:** sem `SECRET_KEY` fixo, o Render gera uma chave nova a cada reinicialização do contêiner, invalidando todos os tokens JWT ativos.
+
+Após salvar, o Render reinicia o serviço automaticamente com as novas variáveis. O `Dockerfile` copia `src/` e `frontend/` para a imagem, portanto o frontend é servido na raiz sem nenhum serviço adicional.
 
 ## Execução local da API
 
@@ -89,6 +146,8 @@ uvicorn src.main:app --reload
 ```
 
 No PowerShell, ative o ambiente com `.venv\Scripts\Activate.ps1`. O `--reload` serve apenas ao desenvolvimento; o [Dockerfile](Dockerfile) inicia sem ele. Configure uma `SECRET_KEY` persistente antes de usar autenticação de forma contínua. O arquivo `.env.example` explica as variáveis principais; `ALLOWED_ORIGINS` tem uma lista explícita em [`src/app/config.py`](src/app/config.py).
+
+Com o servidor rodando localmente, acesse o frontend em <http://127.0.0.1:8000/>. O campo "URL da API" na tela de login já usará `http://127.0.0.1:8000` automaticamente.
 
 ## Rotas e controles de segurança
 
