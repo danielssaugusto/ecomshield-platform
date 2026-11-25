@@ -1,0 +1,607 @@
+{
+  "dataset": "bitext-retail-ecommerce-intents-v1",
+  "train_rows": 40395,
+  "test_rows": 4489,
+  "grid_search": {
+    "cv": 3,
+    "scoring": "f1_macro",
+    "parameters": {
+      "tfidf__min_df": [
+        1,
+        2,
+        3
+      ],
+      "classifier__C": [
+        0.5,
+        1.0,
+        2.0
+      ]
+    },
+    "best_params": {
+      "classifier__C": 2.0,
+      "tfidf__min_df": 1
+    },
+    "best_cv_macro_f1": 0.9875881947653621
+  },
+  "baseline": {
+    "strategy": "most_frequent",
+    "accuracy": 0.022276676319893073,
+    "macro_f1": 0.0009474452139805016
+  },
+  "tuned_model": {
+    "accuracy": 0.990198262419247,
+    "macro_f1": 0.9902645532383234,
+    "roc_auc_ovr_macro": 0.9999652084971821,
+    "per_class": {
+      "add_product": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 96
+      },
+      "availability": {
+        "precision": 0.9797979797979798,
+        "recall": 1.0,
+        "f1": 0.9897959183673469,
+        "support": 97
+      },
+      "availability_in_store": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 76
+      },
+      "availability_online": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "cancel_order": {
+        "precision": 0.9801980198019802,
+        "recall": 0.99,
+        "f1": 0.9850746268656716,
+        "support": 100
+      },
+      "change_account": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1": 0.99,
+        "support": 99
+      },
+      "change_order": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 96
+      },
+      "close_account": {
+        "precision": 1.0,
+        "recall": 0.98,
+        "f1": 0.98989898989899,
+        "support": 100
+      },
+      "customer_service": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "damaged_delivery": {
+        "precision": 0.9897959183673469,
+        "recall": 0.9797979797979798,
+        "f1": 0.9847715736040609,
+        "support": 99
+      },
+      "delivery_issue": {
+        "precision": 1.0,
+        "recall": 0.99,
+        "f1": 0.9949748743718593,
+        "support": 100
+      },
+      "delivery_time": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 92
+      },
+      "exchange_product": {
+        "precision": 0.9896907216494846,
+        "recall": 0.9696969696969697,
+        "f1": 0.9795918367346939,
+        "support": 99
+      },
+      "exchange_product_in_store": {
+        "precision": 1.0,
+        "recall": 0.98989898989899,
+        "f1": 0.9949238578680203,
+        "support": 99
+      },
+      "human_agent": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "missing_item": {
+        "precision": 1.0,
+        "recall": 0.9861111111111112,
+        "f1": 0.993006993006993,
+        "support": 72
+      },
+      "open_account": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "order_history": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "pay": {
+        "precision": 1.0,
+        "recall": 0.9797979797979798,
+        "f1": 0.9897959183673469,
+        "support": 99
+      },
+      "payment_issue": {
+        "precision": 0.9900990099009901,
+        "recall": 1.0,
+        "f1": 0.9950248756218906,
+        "support": 100
+      },
+      "payment_methods": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      },
+      "product_information": {
+        "precision": 0.99,
+        "recall": 1.0,
+        "f1": 0.9949748743718593,
+        "support": 99
+      },
+      "product_issue": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1": 0.99,
+        "support": 99
+      },
+      "recover_password": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "refund_policy": {
+        "precision": 0.99,
+        "recall": 1.0,
+        "f1": 0.9949748743718593,
+        "support": 99
+      },
+      "refund_status": {
+        "precision": 0.9803921568627451,
+        "recall": 1.0,
+        "f1": 0.9900990099009901,
+        "support": 100
+      },
+      "remove_product": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "request_invoice": {
+        "precision": 1.0,
+        "recall": 0.98,
+        "f1": 0.98989898989899,
+        "support": 100
+      },
+      "request_refund": {
+        "precision": 0.9795918367346939,
+        "recall": 1.0,
+        "f1": 0.9896907216494846,
+        "support": 96
+      },
+      "request_right_to_rectification": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "return_policy": {
+        "precision": 0.9795918367346939,
+        "recall": 0.9696969696969697,
+        "f1": 0.9746192893401016,
+        "support": 99
+      },
+      "return_product": {
+        "precision": 0.9696969696969697,
+        "recall": 0.9696969696969697,
+        "f1": 0.9696969696969697,
+        "support": 99
+      },
+      "return_product_in_store": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1": 0.99,
+        "support": 99
+      },
+      "return_product_online": {
+        "precision": 0.98989898989899,
+        "recall": 0.98989898989899,
+        "f1": 0.98989898989899,
+        "support": 99
+      },
+      "sales_period": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      },
+      "shipping_costs": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 97
+      },
+      "store_location": {
+        "precision": 1.0,
+        "recall": 0.9891304347826086,
+        "f1": 0.994535519125683,
+        "support": 92
+      },
+      "store_opening_hours": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "submit_feedback": {
+        "precision": 0.9611650485436893,
+        "recall": 1.0,
+        "f1": 0.9801980198019802,
+        "support": 99
+      },
+      "submit_product_feedback": {
+        "precision": 0.9690721649484536,
+        "recall": 0.9494949494949495,
+        "f1": 0.9591836734693877,
+        "support": 99
+      },
+      "submit_product_idea": {
+        "precision": 0.9696969696969697,
+        "recall": 0.96,
+        "f1": 0.964824120603015,
+        "support": 100
+      },
+      "technical_issue": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 99
+      },
+      "track_delivery": {
+        "precision": 0.9259259259259259,
+        "recall": 1.0,
+        "f1": 0.9615384615384616,
+        "support": 100
+      },
+      "track_order": {
+        "precision": 1.0,
+        "recall": 0.8888888888888888,
+        "f1": 0.9411764705882353,
+        "support": 99
+      },
+      "use_app": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      },
+      "wrong_item": {
+        "precision": 0.99,
+        "recall": 0.99,
+        "f1": 0.99,
+        "support": 100
+      }
+    },
+    "classification_report": {
+      "add_product": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 96.0
+      },
+      "availability": {
+        "precision": 0.9797979797979798,
+        "recall": 1.0,
+        "f1-score": 0.9897959183673469,
+        "support": 97.0
+      },
+      "availability_in_store": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 76.0
+      },
+      "availability_online": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "cancel_order": {
+        "precision": 0.9801980198019802,
+        "recall": 0.99,
+        "f1-score": 0.9850746268656716,
+        "support": 100.0
+      },
+      "change_account": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1-score": 0.99,
+        "support": 99.0
+      },
+      "change_order": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 96.0
+      },
+      "close_account": {
+        "precision": 1.0,
+        "recall": 0.98,
+        "f1-score": 0.98989898989899,
+        "support": 100.0
+      },
+      "customer_service": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "damaged_delivery": {
+        "precision": 0.9897959183673469,
+        "recall": 0.9797979797979798,
+        "f1-score": 0.9847715736040609,
+        "support": 99.0
+      },
+      "delivery_issue": {
+        "precision": 1.0,
+        "recall": 0.99,
+        "f1-score": 0.9949748743718593,
+        "support": 100.0
+      },
+      "delivery_time": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 92.0
+      },
+      "exchange_product": {
+        "precision": 0.9896907216494846,
+        "recall": 0.9696969696969697,
+        "f1-score": 0.9795918367346939,
+        "support": 99.0
+      },
+      "exchange_product_in_store": {
+        "precision": 1.0,
+        "recall": 0.98989898989899,
+        "f1-score": 0.9949238578680203,
+        "support": 99.0
+      },
+      "human_agent": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "missing_item": {
+        "precision": 1.0,
+        "recall": 0.9861111111111112,
+        "f1-score": 0.993006993006993,
+        "support": 72.0
+      },
+      "open_account": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "order_history": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "pay": {
+        "precision": 1.0,
+        "recall": 0.9797979797979798,
+        "f1-score": 0.9897959183673469,
+        "support": 99.0
+      },
+      "payment_issue": {
+        "precision": 0.9900990099009901,
+        "recall": 1.0,
+        "f1-score": 0.9950248756218906,
+        "support": 100.0
+      },
+      "payment_methods": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 100.0
+      },
+      "product_information": {
+        "precision": 0.99,
+        "recall": 1.0,
+        "f1-score": 0.9949748743718593,
+        "support": 99.0
+      },
+      "product_issue": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1-score": 0.99,
+        "support": 99.0
+      },
+      "recover_password": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "refund_policy": {
+        "precision": 0.99,
+        "recall": 1.0,
+        "f1-score": 0.9949748743718593,
+        "support": 99.0
+      },
+      "refund_status": {
+        "precision": 0.9803921568627451,
+        "recall": 1.0,
+        "f1-score": 0.9900990099009901,
+        "support": 100.0
+      },
+      "remove_product": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "request_invoice": {
+        "precision": 1.0,
+        "recall": 0.98,
+        "f1-score": 0.98989898989899,
+        "support": 100.0
+      },
+      "request_refund": {
+        "precision": 0.9795918367346939,
+        "recall": 1.0,
+        "f1-score": 0.9896907216494846,
+        "support": 96.0
+      },
+      "request_right_to_rectification": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "return_policy": {
+        "precision": 0.9795918367346939,
+        "recall": 0.9696969696969697,
+        "f1-score": 0.9746192893401016,
+        "support": 99.0
+      },
+      "return_product": {
+        "precision": 0.9696969696969697,
+        "recall": 0.9696969696969697,
+        "f1-score": 0.9696969696969697,
+        "support": 99.0
+      },
+      "return_product_in_store": {
+        "precision": 0.9801980198019802,
+        "recall": 1.0,
+        "f1-score": 0.99,
+        "support": 99.0
+      },
+      "return_product_online": {
+        "precision": 0.98989898989899,
+        "recall": 0.98989898989899,
+        "f1-score": 0.98989898989899,
+        "support": 99.0
+      },
+      "sales_period": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 100.0
+      },
+      "shipping_costs": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 97.0
+      },
+      "store_location": {
+        "precision": 1.0,
+        "recall": 0.9891304347826086,
+        "f1-score": 0.994535519125683,
+        "support": 92.0
+      },
+      "store_opening_hours": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "submit_feedback": {
+        "precision": 0.9611650485436893,
+        "recall": 1.0,
+        "f1-score": 0.9801980198019802,
+        "support": 99.0
+      },
+      "submit_product_feedback": {
+        "precision": 0.9690721649484536,
+        "recall": 0.9494949494949495,
+        "f1-score": 0.9591836734693877,
+        "support": 99.0
+      },
+      "submit_product_idea": {
+        "precision": 0.9696969696969697,
+        "recall": 0.96,
+        "f1-score": 0.964824120603015,
+        "support": 100.0
+      },
+      "technical_issue": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 99.0
+      },
+      "track_delivery": {
+        "precision": 0.9259259259259259,
+        "recall": 1.0,
+        "f1-score": 0.9615384615384616,
+        "support": 100.0
+      },
+      "track_order": {
+        "precision": 1.0,
+        "recall": 0.8888888888888888,
+        "f1-score": 0.9411764705882353,
+        "support": 99.0
+      },
+      "use_app": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 100.0
+      },
+      "wrong_item": {
+        "precision": 0.99,
+        "recall": 0.99,
+        "f1-score": 0.99,
+        "support": 100.0
+      },
+      "accuracy": 0.990198262419247,
+      "macro avg": {
+        "precision": 0.9905479914775401,
+        "recall": 0.9902632659296174,
+        "f1-score": 0.9902645532383234,
+        "support": 4489.0
+      },
+      "weighted avg": {
+        "precision": 0.990397303141258,
+        "recall": 0.990198262419247,
+        "f1-score": 0.9901547132878755,
+        "support": 4489.0
+      }
+    }
+  },
+  "gain_over_baseline_macro_f1": 0.9893171080243429,
+  "limitation": "The Bitext corpus is English and hybrid/synthetic; these in-distribution metrics are not a PT-BR or production-performance claim."
+}
