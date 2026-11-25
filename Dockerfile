@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy source code
 COPY src/ src/
+COPY frontend/ frontend/
 COPY pyproject.toml .
 
 EXPOSE 8000

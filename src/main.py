@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
 from fastapi.staticfiles import StaticFiles
@@ -37,6 +37,8 @@ app = FastAPI(
 
 STATIC_DIR = Path(__file__).resolve().parent / "app" / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
 @app.get("/docs", include_in_schema=False)
@@ -121,30 +123,10 @@ def health_check():
         "message": "API operacional",
     }
 
-# ── Home Page ──────────────────────────────────────────
+# ── Home Page (Frontend) ───────────────────────────────
 
-@app.get("/", tags=["Root"])
+@app.get("/", include_in_schema=False)
 def read_root():
-    """
-    Página inicial da API.
-    Retorna metadados do serviço, status e links rápidos para documentação.
-    """
-    return {
-        "name": settings.APP_NAME,
-        "status": "operational",
-        "version": "1.0.0",
-        "description": "API da Plataforma EcomShield com controles de segurança OWASP e ML integrados.",
-        "documentation": {
-            "swagger_ui": "/docs",
-            "redoc": "/redoc",
-            "openapi_schema": app.openapi_url,
-        },
-        "endpoints": {
-            "auth": "/auth",
-            "users": "/users",
-            "reviews": "/reviews",
-            "predictions": "/predictions",
-            "refunds": "/refunds",
-            "health": "/health",
-        },
-    }
+    """Serve o frontend (index.html) na raiz da aplicação."""
+    index = FRONTEND_DIR / "index.html"
+    return FileResponse(str(index), media_type="text/html")
