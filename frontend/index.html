@@ -67,19 +67,19 @@ dialog::backdrop{background:rgba(5,10,20,.55)}
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const S={base:localStorage.getItem('ecs_base')||'http://127.0.0.1:8000',token:sessionStorage.getItem('ecs_t')||'',me:null,spec:null,up:null,tab:'reviews',mode:'login',data:[],result:null,err:''};
+const S={base:(localStorage.getItem('ecs_base')||'http://127.0.0.1:8000').replace(/\/$/,''),token:sessionStorage.getItem('ecs_t')||'',me:null,spec:null,up:null,tab:'reviews',mode:'login',data:[],result:null,err:''};
 const SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>';
 const TABS={
  reviews:{t:'Avaliações',d:'Feedbacks de clientes vinculados à sua conta.',list:'/reviews/',create:{p:'/reviews/',t:'Nova avaliação',btn:'Enviar avaliação'}},
  predictions:{t:'Predições',d:'Consultas de intenção registradas pela API.',list:'/predictions/',create:{p:'/predictions/predict',t:'Nova predição',btn:'Registrar predição'},note:'O endpoint de predição ainda grava uma resposta placeholder: o classificador não está integrado à API.'},
- refunds:{t:'Reembolsos',d:'Solicitações de reembolso e o andamento de cada uma.',list:'/refunds/',create:{p:'/refunds/',t:'Solicitar reembolso',btn:'Solicitar reembolso'},edit:'/refunds/{id}'},
+ refunds:{t:'Reembolsos',d:'Solicitações de reembolso e o andamento de cada uma.',list:'/refunds/',create:{p:'/refunds/',t:'Solicitar reembolso',btn:'Solicitar reembolso'},edit:'/refunds/{refund_id}'},
  users:{t:'Usuários',d:'Contas cadastradas. Disponível para administradores.',list:'/users/',admin:true}
 };
 
 async function api(path,{method='GET',json,form}={}){
  const h={};if(S.token)h.Authorization='Bearer '+S.token;
  let body;if(json){h['Content-Type']='application/json';body=JSON.stringify(json)}if(form)body=new URLSearchParams(form);
- let r;try{r=await fetch(S.base+path,{method,headers:h,body})}catch(e){throw new Error('Não foi possível conectar à API. Confira a URL e se o endereço desta página está em ALLOWED_ORIGINS.')}
+ let r;try{r=await fetch(S.base+path,{method,headers:h,body})}catch(e){throw new Error(location.protocol==='file:'?'Não foi possível conectar via file://. Sirva a pasta frontend por HTTP (ex.: http://localhost:3000) para atender ao CORS (ALLOWED_ORIGINS).':'Não foi possível conectar à API. Confira a URL e se o endereço desta página está em ALLOWED_ORIGINS.')}
  const t=await r.text();let d;try{d=JSON.parse(t)}catch{d=t}
  if(r.status===429)throw new Error('Muitas tentativas de login. Aguarde '+(r.headers.get('Retry-After')||'60')+' segundos.');
  if(r.status===401&&S.token&&path!=='/auth/token'){logout();throw new Error('Sua sessão expirou. Entre novamente.')}
@@ -87,21 +87,23 @@ async function api(path,{method='GET',json,form}={}){
  return d}
 
 const deref=s=>{if(!s)return{};if(s.$ref)return deref(S.spec.components.schemas[s.$ref.split('/').pop()]);const a=s.anyOf||s.oneOf;if(a)return deref(a.find(x=>x.type!=='null')||a[0]);return s};
-const bodySchema=(p,m)=>{const c=S.spec&&S.spec.paths&&S.spec.paths[p]&&S.spec.paths[p][m]&&S.spec.paths[p][m].requestBody;return c&&c.content&&c.content['application/json']?deref(c.content['application/json'].schema):null};
+const pathOp=(p,m)=>S.spec&&S.spec.paths&&S.spec.paths[p]&&S.spec.paths[p][m]||null;
+const bodySchema=(p,m)=>{const op=pathOp(p,m),c=op&&op.requestBody;return c&&c.content&&c.content['application/json']?deref(c.content['application/json'].schema):null};
 
 function fields(sc){
  const req=sc.required||[];
  return Object.entries(sc.properties||{}).map(([k,p])=>{
   const d=deref(p),r=req.includes(k),n=esc(k);
   const lab=esc(p.title||d.title||k)+(r?' *':'');
+  const desc=p.description||d.description;
   let i;
-  if(d.enum)i=`<select name="${n}">${(r?'':'<option value=""></option>')+d.enum.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`;
+  if(d.enum)i=`<select name="${n}">${(r?'':'<option value=""></option>')+d.enum.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')}</select>`;
   else if(d.type==='boolean')i=`<input type="checkbox" name="${n}" data-t="b" style="margin-left:6px">`;
   else if(d.type==='integer'||d.type==='number')i=`<input type="number" name="${n}" data-t="n" step="${d.type==='integer'?1:'any'}" ${r?'required':''} ${d.minimum!=null?`min="${d.minimum}"`:''} ${d.maximum!=null?`max="${d.maximum}"`:''}>`;
   else if(/pass|senha/i.test(k))i=`<input type="password" name="${n}" autocomplete="new-password" ${r?'required':''} ${d.minLength?`minlength="${d.minLength}"`:''}>`;
   else if(/text|comment|message|description|reason|body|content|note|motivo/i.test(k)||d.maxLength>200)i=`<textarea name="${n}" ${r?'required':''} ${d.maxLength?`maxlength="${d.maxLength}"`:''}></textarea>`;
-  else i=`<input name="${n}" ${r?'required':''} ${d.minLength?`minlength="${d.minLength}"`:''} ${d.maxLength?`maxlength="${d.maxLength}"`:''}>`;
-  return `<label>${lab}${i}${d.description?`<small>${esc(d.description)}</small>`:''}</label>`}).join('')}
+  else i=`<input ${d.format==='email'?'type="email"':''} name="${n}" ${r?'required':''} ${d.minLength?`minlength="${d.minLength}"`:''} ${d.maxLength?`maxlength="${d.maxLength}"`:''}>`;
+  return `<label>${lab}${i}${desc?`<small>${esc(desc)}</small>`:''}</label>`}).join('')}
 function collect(f){const o={};f.querySelectorAll('[name]').forEach(e=>{const t=e.dataset.t;if(t==='b')o[e.name]=e.checked;else if(e.value!=='')o[e.name]=t==='n'?Number(e.value):e.value});return o}
 const admin=()=>!!S.me&&((S.me.role===undefined&&S.me.is_admin===undefined)||String(S.me.role).toLowerCase()==='admin'||S.me.is_admin===true);
 
@@ -120,18 +122,19 @@ function table(rows,t){
 
 function cfg(){return `<div class="cfg"><input id="base" value="${esc(S.base)}" aria-label="URL da API"><button class="btn ghost" id="apply" type="button">Aplicar</button></div>`}
 async function boot(){
- try{S.spec=await api('/openapi.json');await api('/health');S.up=true}catch(e){S.up=false}
+ S.spec=null;
+ try{S.spec=await api('/openapi.json');await api('/health');S.up=true}catch(e){S.spec=null;S.up=false}
  if(S.token){try{S.me=await api('/users/me')}catch(e){S.token='';sessionStorage.removeItem('ecs_t')}}
  render()}
 function bindCfg(){const a=$('#apply');if(a)a.onclick=()=>{S.base=$('#base').value.trim().replace(/\/$/,'');localStorage.setItem('ecs_base',S.base);boot()}}
-function logout(){S.token='';S.me=null;sessionStorage.removeItem('ecs_t');render()}
+function logout(){S.token='';S.me=null;S.data=[];S.result=null;S.err='';S.tab='reviews';sessionStorage.removeItem('ecs_t');render()}
 
 function render(){S.me?renderMain():renderAuth()}
 function renderAuth(){
  const reg=S.mode==='register',sc=reg&&bodySchema('/auth/register','post');
- const form=reg?(sc&&sc.properties?fields(sc):'<label>Usuário<input name="username" required></label><label>Senha<input type="password" name="password" required></label>'):'<label>Usuário<input name="username" required autocomplete="username"></label><label>Senha<input type="password" name="password" required autocomplete="current-password"></label>';
+ const form=reg?(sc&&sc.properties?fields(sc):'<label>Usuário *<input name="username" required maxlength="50"></label><label>E-mail *<input type="email" name="email" required></label><label>Senha *<input type="password" name="password" autocomplete="new-password" required minlength="8"></label>'):'<label>Usuário<input name="username" required autocomplete="username"></label><label>Senha<input type="password" name="password" required autocomplete="current-password"></label>';
  $('#app').innerHTML=`<div class="auth"><div class="brand">${SHIELD}E-ComShield</div><p class="sub" style="text-align:center;margin:0 auto 18px">Reembolsos, avaliações e predições com acesso controlado por papel.</p>
- <div class="panel"><div class="tabs"><button class="btn ${reg?'':'on'}" data-m="login">Entrar</button><button class="btn ${reg?'on':''}" data-m="register">Criar conta</button></div>
+ <div class="panel"><div class="tabs"><button type="button" class="btn ${reg?'':'on'}" data-m="login">Entrar</button><button type="button" class="btn ${reg?'on':''}" data-m="register">Criar conta</button></div>
  <form id="af">${form}<p class="err" id="err">${esc(S.err)}</p><button class="btn" style="width:100%">${reg?'Criar conta':'Entrar'}</button></form>
  ${cfg()}<p class="pill" style="margin:10px 0 0"><span class="dot ${S.up?'on':'off'}"></span>${S.up?'API conectada':'API indisponível'}</p></div></div>`;
  bindCfg();
@@ -139,7 +142,7 @@ function renderAuth(){
  $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.btn');btn.disabled=true;
   try{const v=collect(f);
    if(reg){await api('/auth/register',{method:'POST',json:v});S.mode='login';S.err='';render();$('#err').innerHTML='<span class="ok">Conta criada. Agora é só entrar.</span>'}
-   else{const d=await api('/auth/token',{method:'POST',form:{username:v.username,password:v.password}});S.token=d.access_token;sessionStorage.setItem('ecs_t',S.token);S.me=await api('/users/me');S.err='';S.tab='reviews';render()}
+   else{const d=await api('/auth/token',{method:'POST',form:{username:v.username,password:v.password}});S.token=d.access_token;sessionStorage.setItem('ecs_t',S.token);S.me=await api('/users/me');S.err='';S.tab='reviews';render();await load()}
   }catch(x){S.err=x.message;$('#err').textContent=x.message;btn.disabled=false}}}
 
 async function load(){const t=TABS[S.tab];try{S.data=await api(t.list)}catch(e){S.data=[];S.err=e.message}paint()}
@@ -150,20 +153,21 @@ function renderMain(){
  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;S.result=null;S.err='';renderMain();load()});
  paint()}
 function paint(){
- const t=TABS[S.tab],c=t.create,sc=c&&bodySchema(c.p,'post');
+ const t=TABS[S.tab],c=t.create,op=c&&pathOp(c.p,'post'),sc=c&&bodySchema(c.p,'post');
+ const formHtml=sc?`<form id="cf">${fields(sc)}<p class="err" id="cerr"></p><button class="btn">${c.btn}</button></form>`:op?`<form id="cf"><p class="sub" style="margin:0 0 12px">Este endpoint não requer parâmetros de entrada.</p><p class="err" id="cerr"></p><button class="btn">${c.btn}</button></form>`:'<p class="sub">Não encontrei o formato deste formulário no /openapi.json da API.</p>';
  $('#mn').innerHTML=`<h1>${t.t}</h1><p class="sub">${t.d}</p>${t.note?`<p class="note">${t.note}</p>`:''}${S.err?`<p class="err">${esc(S.err)}</p>`:''}
- <div class="${c?'grid':''}">${c?`<section class="panel"><h2>${c.t}</h2>${sc?`<form id="cf">${fields(sc)}<p class="err" id="cerr"></p><button class="btn">${c.btn}</button></form>`:'<p class="sub">Não encontrei o formato deste formulário no /openapi.json da API.</p>'}${S.result?`<div class="res">${esc(JSON.stringify(S.result,null,2))}</div>`:''}</section>`:''}
+ <div class="${c?'grid':''}">${c?`<section class="panel"><h2>${c.t}</h2>${formHtml}${S.result?`<div class="res">${esc(JSON.stringify(S.result,null,2))}</div>`:''}</section>`:''}
  <section class="panel"><div class="tablewrap">${table(S.data,t)}</div></section></div>`;
  const f=$('#cf');
  if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('.btn');b.disabled=true;
-  try{S.result=await api(c.p,{method:'POST',json:collect(f)});S.err='';await load()}catch(x){$('#cerr').textContent=x.message;b.disabled=false}};
+  try{S.result=await api(c.p,{method:'POST',json:sc?collect(f):undefined});S.err='';await load()}catch(x){$('#cerr').textContent=x.message;b.disabled=false}};
  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(S.data[+b.dataset.edit]))}
 function edit(row){
  const sc=bodySchema(TABS[S.tab].edit,'patch'),d=$('#dlg');
  d.innerHTML=`<h2 style="margin-top:0;font-size:17px">Atualizar reembolso ${esc(row.id)}</h2>${sc?`<form id="ef">${fields(sc)}<p class="err" id="eerr"></p><div class="row"><button type="button" class="btn ghost" id="cx">Cancelar</button><button class="btn">Salvar alterações</button></div></form>`:'<p>Formato de atualização não encontrado no /openapi.json.</p>'}`;
  d.showModal();$('#cx')&&($('#cx').onclick=()=>d.close());
  const f=$('#ef');if(f)f.querySelectorAll('[name]').forEach(e=>{if(row[e.name]!=null){if(e.dataset.t==='b')e.checked=!!row[e.name];else e.value=row[e.name]}});
- if(f)f.onsubmit=async ev=>{ev.preventDefault();try{await api(TABS[S.tab].edit.replace('{id}',row.id),{method:'PATCH',json:collect(f)});d.close();load()}catch(x){$('#eerr').textContent=x.message}}}
+ if(f)f.onsubmit=async ev=>{ev.preventDefault();const b=f.querySelector('button:not([type=button])');if(b)b.disabled=true;try{await api(TABS[S.tab].edit.replace(/\{[^}]+\}/,row.id),{method:'PATCH',json:collect(f)});d.close();await load()}catch(x){$('#eerr').textContent=x.message;if(b)b.disabled=false}}}
 
 boot().then(()=>{if(S.me)load()});
 </script>
