@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Secure e-commerce refund and risk management platform"
 requires-python = ">=3.10"
 
-
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -13,6 +12,7 @@ dependencies = [
     "python-jose[cryptography]",
     "passlib[bcrypt]",
     "python-multipart",
+
     "sqlalchemy",
     "sqlmodel",
     "psycopg2-binary",
